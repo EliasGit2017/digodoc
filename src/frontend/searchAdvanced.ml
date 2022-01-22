@@ -17,7 +17,7 @@ open Data_types
 open Utils
 
 
-(**Trying stuff Elias *)
+(**Remove this asap*)
 open Objects
 
 (** Module [SearchAdvanced] defines behaviour for search pages (search.html).
@@ -293,6 +293,8 @@ let update_element_state () =
     let element =
       match id with
       | "fvals" -> VAL
+      (* | "fclasses" -> ... (search by classes) *)
+      (* | "ftypes" -> ... (search by types) *)
       | _ -> raise @@
           web_app_error (Printf.sprintf "update_element_state: can't find %s id" id)
     in
@@ -316,11 +318,8 @@ let update_element_state () =
   (* Handle checkboxes *)
   handle_checkbox "fvals" element_state;
   element_state.regex <- to_bool (get_input "fregex")##.checked;
-  element_state.in_opams <- StringSet.empty;
-  element_state.in_mdls <- StringSet.empty; 
-  (* TODO : get opams and mdls names from tags *)
-  element_state.in_opams <- getTags "pack_tag_container" ;
-  element_state.in_mdls <- getTags "mod_tag_container" ;
+  element_state.in_opams <- getTags "pack_tag_container";
+  element_state.in_mdls <- getTags "mod_tag_container";
 
   match element_state.elements with
   | set when ElementSet.is_empty set -> false
@@ -443,8 +442,6 @@ let insert_modsUl_li : modules_jsoo t -> unit  =
         cur_tags := StringSet.add (to_string (tag_li##.innerText)) !cur_tags;
       done
     end;
-  (* logs "printing selected tags  ----> ";
-     StringSet.iter (fun e -> logs e) !cur_tags; *)
   foreach
     (fun i elt ->
        if i < 10
@@ -488,42 +485,6 @@ let insert_modsUl_li : modules_jsoo t -> unit  =
     )
     modules
 (** preview modules propositions from which to choose *)
-
-(* let insert_Sources_fulltext : sources_search_result_jsoo t -> unit = 
-  fun (sources : sources_search_result_jsoo t) ->
-  sources *)
-(** Insert Sources results for fulltext search *)
-
-(* let preview_Sources pattern files =
-  let sources_search_info = {
-    pattern;
-    files;
-    is_regex = true;
-    is_case_sensitive = true;
-    last_match_id = 10; 
-  } in
-  Lwt.async @@
-  Requests.send_generic_request
-    ~request:(Requests.getSources_fulltext sources_search_info)
-    ~callback:(fun source_search_result ->
-        if not @@ (source_search_result.occs = [])
-        then
-          begin
-            insert_Sources_fulltext (Objects.sources_search_result_to_jsoo source_search_result);
-          end;  
-        Lwt.return_unit
-      )
-    ~error:(fun err ->
-        begin
-          match err with
-          | Unknown ->
-              logs "Something went wrong in preview_Sources"
-          | _ ->
-              warn "Work on preview_Sources";
-        end;
-        Lwt.return_unit
-      ) *)
-(** Request to get sources for fulltext search (improve comments as ASAP) *)
 
 let previewpacks pattern =
   let entry_info = {
@@ -602,7 +563,7 @@ let set_handlers () =
   let slider_show_hide = unopt @@ Html.CoerceTo.input @@ get_element_by_id "fregex" in
   let toggle_entry_form = unopt @@ Html.CoerceTo.button @@ get_element_by_id "col_entry" in
   let toggle_element_form = unopt @@ Html.CoerceTo.button @@ get_element_by_id "col_funcs" in
-  (* let toggle_fulltext_form = unopt @@ Html.CoerceTo.button @@ get_element_by_id "col_fulltext" in *)
+  let toggle_fulltext_form = unopt @@ Html.CoerceTo.button @@ get_element_by_id "col_fulltext" in
   let pack_tag_handling = unopt @@ Html.CoerceTo.input @@ get_element_by_id "ftextpackages" in
   let mod_tag_handling = unopt @@ Html.CoerceTo.input @@ get_element_by_id "ftextmodules" in
 
@@ -656,21 +617,37 @@ let set_handlers () =
 
   toggle_entry_form##.onclick := Html.handler (fun _ ->
       let hide_this = get_element_by_id "element-search-content" in
+      let hide_this2 = get_element_by_id "fulltext-search-content" in
       let show_this = get_element_by_id "entry-search-content" in
       hide_this##.style##.display := js "none";
+      hide_this2##.style##.display := js "none";
       show_this##.style##.display := js "block";
       _false
     );
-  (**Show entry-form's div when button having id="col_entry" is clicked and hide element-form's div *)
+  (**Show entry-form's div when button having id="col_entry" is clicked and hide other form's div *)
 
   toggle_element_form##.onclick := Html.handler (fun _ ->
       let show_this = get_element_by_id "element-search-content" in
       let hide_this = get_element_by_id "entry-search-content" in
+      let hide_this2 = get_element_by_id "fulltext-search-content" in
       hide_this##.style##.display := js "none";
+      hide_this2##.style##.display := js "none";
       show_this##.style##.display := js "block";
       _false
     );
-  (**Show element-form's div when button having id="col_funcs" is clicked and hide entry-form's div *)
+  (**Show element-form's div when button having id="col_funcs" is clicked and hide other form's div *)
+
+  toggle_fulltext_form##.onclick := Html.handler (fun _ ->
+  let show_this = get_element_by_id "fulltext-search-content" in
+  let hide_this = get_element_by_id "entry-search-content" in
+  let hide_this2 = get_element_by_id "element-search-content" in
+  hide_this##.style##.display := js "none";
+  hide_this2##.style##.display := js "none";
+  show_this##.style##.display := js "block";
+  _false
+  );
+  (**Show fulltext-search-form's div when button having id="col_fulltext" is clicked and hide other form's div *)
+
 
   pack_tag_handling##.onkeyup := Html.handler (fun kbevent ->
       let cur_input_value = pack_tag_handling##.value##trim in

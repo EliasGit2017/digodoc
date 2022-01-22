@@ -31,7 +31,7 @@ let activate_bar () =
     | "metas.html" -> activate "metas-item"
     | "modules.html" -> activate "modules-item"
     | "sources.html" -> activate "sources-item"
-    | "fulltext_search.html" -> activate "fulltext_search-item" (* Check for *-item in html files *)
+    | "fulltext_search.html" -> activate "fulltext-search-item"
     | _ -> 
         raise @@ 
         web_app_error (Printf.sprintf {|activate_bar : file "%s" couldn't activate the bar|} filename) 
@@ -47,8 +47,8 @@ let footerHandler () =
   footer##.style##.position := js "relative";
   let innerHeight = unoptdef @@ window##.innerHeight
   and clientHeight = document##.body##.clientHeight in
-  logs ("innerHeight ------------> " ^ (string_of_int innerHeight));
-  logs ("clientHeigth -----------> " ^ (string_of_int clientHeight));
+  (* logs ("innerHeight ------------> " ^ (string_of_int innerHeight));
+  logs ("clientHeigth -----------> " ^ (string_of_int clientHeight)); *)
   (* If page height is bigger than window height *)
   if innerHeight <= clientHeight
   then footer##.style##.position := js "relative"

@@ -123,6 +123,49 @@
       </table>
     </form>
   </div>
+
+  <!-- Fulltext Search -->
+
+  <button type="button" id="col_fulltext" class="collapsible-div">Fulltext Search</button>
+
+  <div id="fulltext-search-content" class="form-div">
+    <form class="search-form" id="fulltext-form">
+      <table>
+        <tbody>
+          <tr>
+            <td colspan="2">
+              <label for="fpattern_element">Search pattern:</label>
+              <input type="text" class="fpattern" id="fpattern_element" name="fpattern_element" value=""><br>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label class="switch">
+                <input type="checkbox" id="fregex" checked>
+                <span class="slider round"></span>
+              </label>
+              <label>Pattern or <a style="color: green;">RegEx</a></label>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label class="switch">
+                <input type="checkbox" id="fregex" checked>
+                <span class="slider round"></span>
+              </label>
+              <label>Case sensitive ? </label>
+            </td>
+          </tr>
+          <tr>
+            <td style="text-align: center;" colspan="2">
+              <input type="submit" class="submitstyle" value="Search">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </form>
+  </div>
+
 </div>
 
 <div id="entries-nav" style="display: none;">
@@ -153,13 +196,18 @@
   </div>
   <nav id="pagination-nav">
     <a id="previous-page" style="display: none;" href="">
-      <svg width="29" height="29" viewBox="0 0 29 29" xmlns="http://www.w3.org/2000/svg"><circle fill="#D6D6D5" cx="14.5" cy="14.5" r="14.5"></circle><path fill="#FFF" d="M14.5 19v-3h5v-3h-5v-3L9 14.5z"></path></svg>
+      <svg width="29" height="29" viewBox="0 0 29 29" xmlns="http://www.w3.org/2000/svg">
+        <circle fill="#D6D6D5" cx="14.5" cy="14.5" r="14.5"></circle>
+        <path fill="#FFF" d="M14.5 19v-3h5v-3h-5v-3L9 14.5z"></path>
+      </svg>
     </a>
     <ol id="pages">
     </ol>
     <a id="next-page" style="display: none;" href="">
-      <svg width="29" height="29" viewBox="0 0 29 29" xmlns="http://www.w3.org/2000/svg"><circle fill="#D6D6D5" cx="14.5" cy="14.5" r="14.5"></circle><path fill="#FFF" d="M15 19v-3h-5v-3h5v-3l5.5 4.5z"></path></svg>
+      <svg width="29" height="29" viewBox="0 0 29 29" xmlns="http://www.w3.org/2000/svg">
+        <circle fill="#D6D6D5" cx="14.5" cy="14.5" r="14.5"></circle>
+        <path fill="#FFF" d="M15 19v-3h-5v-3h5v-3l5.5 4.5z"></path>
+      </svg>
     </a>
   </nav>
 </div>
-
