@@ -3,7 +3,7 @@
 (library
  (name ui_lib)
  (wrapped false)
- (modules headfoot search searchAdvanced index requests globals insertion objects)
+ (modules headfoot search searchAdvanced index requests globals insertion objects fulltext_search)
  (preprocess (pps js_of_ocaml-ppx ppx_deriving_jsoo lwt_ppx))
  (libraries js_of_ocaml-lwt digodoc-search-api.data_common digodoc-search-api.services ez_api ez_api.ixhr_lwt ))
 

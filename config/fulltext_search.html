@@ -1,41 +1,44 @@
-<!-- Fulltext Search -->
+ <!-- Fulltext Search -->
 
-<button type="button" id="col_fulltext" class="collapsible-div">Fulltext Search</button>
+ <button type="button" id="col_fulltext" class="collapsible-div">Fulltext Search</button>
 
-<div id="fulltext-search-content" class="fulltext-form-div" style="display : block">
-  <form class="search-form" id="fulltext-form">
-    <table>
-      <tbody>
-        <tr>
-          <td colspan="2">
-            <label for="fpattern_element">Search pattern:</label>
-            <input type="text" class="fpattern" id="fpattern_element" name="fpattern_element" value=""><br>
-            <span class="regex_instructions">
-              <p><code>\.</code> match any single character</p>
-              <p><code>a\?</code> optionally match a character</p>
-            </span>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label class="switch">
-              <input type="checkbox" id="fregex" checked>
-              <span class="slider round"></span>
-            </label>
-            <label>Pattern or <a style="color: green;">RegEx</a></label>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label class="switch">
-              <input type="checkbox" id="fregex" checked>
-              <span class="slider round"></span>
-            </label>
-            <label>Case sensitive ? </label>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </form>
-</div>
+ <div id="fulltext-search-content" class="fulltext-form-div" style="display : block">
+   <form class="search-form" id="fulltext-form">
+     <table>
+       <tbody>
+         <tr>
+           <td colspan="2">
+             <label for="fpattern_fulltext">Search pattern:</label>
+             <input type="text" class="fpattern" id="fpattern_fulltext" name="fpattern_element" value=""
+             onfocusin="fadeIn(800)" onfocusout="fadeOut(800)"><br>
+             <div id="this">
+               <div> <code>Inst</code> 1 and other desc </div>
+               <div> <code>Inst</code> 1 and other desc </div>
+               <div> <code>Inst</code> 1 and other desc </div>
+               <div> <code>Inst</code> 1 and other desc </div>
+             </div>
+           </td>
+         </tr>
+         <tr>
+           <td>
+             <label class="switch">
+               <input type="checkbox" id="fregex" checked>
+               <span class="slider round"></span>
+             </label>
+             <label>Pattern or <a style="color: green;">RegEx</a></label>
+           </td>
+         </tr>
+         <tr>
+           <td>
+             <label class="switch">
+               <input type="checkbox" id="fcase_sens" checked>
+               <span class="slider round"></span>
+             </label>
+             <label>Case sensitive ? </label>
+           </td>
+         </tr>
+       </tbody>
+     </table>
+   </form>
+ </div>
 </div>

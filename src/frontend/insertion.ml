@@ -16,6 +16,9 @@ open Objects
 open Globals
 open Data_types
 
+
+module StringSet = Set.Make(String)
+
 (** Module [Insertion] unions functions that make various DOM insertions. *)
 
 let set_attr elt attr value =
@@ -583,3 +586,142 @@ let insert_elements_search elements =
     | Val vals -> insert_vals_search (Objects.vals_to_jsoo vals)
 (** Calls specific to [elements] insertion function for search page *)
 
+(** ----------------------------------------------------------------------------------------------- *)
+
+let insert_modsUl_li : modules_jsoo t -> unit  = 
+  fun (modules : modules_jsoo t) ->
+  let modsUl = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "modsUl" in
+  let input = unopt @@ Html.CoerceTo.input @@ get_element_by_id "ftextmodules" in
+  let tag_container = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "mod_tag_container" in
+  (* Start by removing all children from packsUl and replace them with result of new request 
+     modsUl##.innerHTML = ""; *)
+  let clean_lis = modsUl##.childNodes in
+  for i = 0 to clean_lis##.length - 1
+  do
+    let li_i = unopt @@ Html.CoerceTo.element @@ unopt @@ (clean_lis##item i) in 
+    Dom.removeChild modsUl li_i;
+  done;
+
+  let cur_tags = ref StringSet.empty in
+  if to_bool tag_container##hasChildNodes
+  then
+    begin
+      let chosen_tags = tag_container##.childNodes in
+      for i = 0 to chosen_tags##.length - 1
+      do
+        let tag_li = unopt @@ Html.CoerceTo.element @@ unopt @@ (chosen_tags##item i) in
+        cur_tags := StringSet.add (to_string (tag_li##.innerText)) !cur_tags;
+      done
+    end;
+  foreach
+    (fun i elt ->
+       if i < 10
+       then begin
+         let pack_li = Html.createLi document in
+         let name_version = to_string (concat (concat elt##.name (js " ")) elt##.opam) in
+         pack_li##.onclick := Html.handler (fun _ ->
+             if (StringSet.mem name_version !cur_tags)
+             then Html.window##alert (js ("Error : package " ^ name_version ^ " already chosen,\nCheck for a different version"))
+             else 
+               begin
+                 cur_tags := StringSet.add name_version !cur_tags;
+                 let sp1 = Html.createSpan document in
+                 let sp2 = Html.createSpan document in
+                 sp1##.classList##add (js "tag"); 
+                 sp1##.innerText := js name_version;
+                 sp2##.classList##add (js "remove");
+                 sp2##.onclick := Html.handler (fun _ ->
+                     cur_tags := StringSet.remove name_version !cur_tags;
+                     Dom.removeChild (unopt @@ sp1##.parentNode) sp1;
+                     _false
+                   );
+                 let tag_container_li = Html.createLi document in
+                 Dom.appendChild sp1 sp2;
+                 Dom.appendChild tag_container_li sp1;
+                 Dom.appendChild tag_container tag_container_li;
+               end;
+             input##.value := js "";
+             modsUl##.style##.display := js "none";
+             Headfoot.footerHandler();
+             _false
+           );
+         let a_li = Html.createA document in
+         set_attr a_li "href" (js ("#"));
+         a_li##.innerText := js  name_version;
+         pack_li##.style##.display := js "block";
+         Dom.appendChild pack_li a_li;
+         Dom.appendChild modsUl pack_li;
+         Headfoot.footerHandler();
+       end;
+    )
+    modules
+(** preview modules propositions from which to choose *)
+
+let insert_packsUl_li : packages_jsoo t -> unit  = 
+  fun (packages : packages_jsoo t) ->
+  let packsUl = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "packsUl" in
+  let input = unopt @@ Html.CoerceTo.input @@ get_element_by_id "ftextpackages" in
+  let tag_container = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "pack_tag_container" in
+  (* Start by removing all children from packsUl and replace them with result of new request 
+     packsUl##.innerHTML = "";*)
+  packsUl##.innerHTML := js "";
+
+  let cur_tags = ref StringSet.empty in
+  if to_bool tag_container##hasChildNodes
+  then
+    begin
+      let chosen_tags = tag_container##.childNodes in
+      for i = 0 to chosen_tags##.length - 1
+      do
+        let tag_li = unopt @@ Html.CoerceTo.element @@ unopt @@ (chosen_tags##item i) in
+        cur_tags := StringSet.add (to_string (tag_li##.innerText)) !cur_tags;
+      done
+    end;
+  foreach
+    (fun i elt ->
+       if i < 10
+       then begin
+         let pack_li = Html.createLi document in
+         let name_version = to_string (concat (concat elt##.name (js " ")) elt##.version) in
+         pack_li##.onclick := Html.handler (fun _ ->
+             if (StringSet.mem name_version !cur_tags)
+             then Html.window##alert (js ("Error : package " ^ name_version ^ " already chosen,\nCheck for a different version"))
+             else 
+               begin
+                 cur_tags := StringSet.add name_version !cur_tags;
+                 let sp1 = Html.createSpan document in
+                 let sp2 = Html.createSpan document in
+                 sp1##.classList##add (js "tag"); 
+                 sp1##.innerText := js name_version;
+                 sp2##.classList##add (js "remove");
+                 sp2##.onclick := Html.handler (fun _ ->
+                     cur_tags := StringSet.remove name_version !cur_tags;
+                     Dom.removeChild (unopt @@ sp1##.parentNode) sp1;
+                     _false
+                   );
+                 let tag_container_li = Html.createLi document in
+                 Dom.appendChild sp1 sp2;
+                 Dom.appendChild tag_container_li sp1;
+                 Dom.appendChild tag_container tag_container_li;
+               end;
+             input##.value := js "";
+             packsUl##.style##.display := js "none";
+             Headfoot.footerHandler();
+             _false
+           );
+         let a_li = Html.createA document in
+         set_attr a_li "href" (js ("#"));
+         a_li##.innerText := js  name_version;
+         pack_li##.style##.display := js "block";
+         Dom.appendChild pack_li a_li;
+         Dom.appendChild packsUl pack_li;
+         Headfoot.footerHandler();
+       end;
+    )
+    packages
+(** preview packages propositions from which to choose *)
+
+(* let insert_Sources_fulltext : sources_search_result_jsoo t -> unit = 
+   fun (sources : sources_search_result_jsoo t) ->
+   sources *)
+(** Insert Sources results for fulltext search *)
