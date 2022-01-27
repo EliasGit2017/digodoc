@@ -196,7 +196,12 @@ let is_index_page : bool =
   in_root_directory 
   && not (String.equal filename "about.html")
   && not (String.equal filename "search.html")
+  && not (String.equal filename "fulltext_search.html")
 (** Says if current file is index page *)
+
+let is_fulltext_page : bool =
+  path.(0) = "fulltext_search.html"
+(** Says if current file is a fulltext_search page *)
 
 let is_doc_page : bool =
   path.(0) = "docs"

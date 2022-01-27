@@ -68,14 +68,22 @@ let main () =
       let%lwt () = Search.onload () in
       Index.onload ()
     )
-  in 
+  in
+  let fulltextHandler = (fun () ->
+      let%lwt () = Fulltext_search.onload () in 
+      Search.onload ()
+    )
+  in
   (* footer handler when resized *)
   window##.onresize := footHandler;
   if is_index_page 
   then window##.onload := genericHandler indexHandler
   else if is_search_page
   then window##.onload := genericHandler searchPageHandler
+  else if is_fulltext_page
+  then window##.onload := genericHandler fulltextHandler
   else window##.onload := genericHandler Search.onload
+
 (** Entry point. Looks up for page type and calls [genericHandler] with specific to this page handler as argument. *)
 
 let () = main ()

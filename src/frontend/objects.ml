@@ -78,8 +78,7 @@ type nonrec val_element = Data_types.val_element = {
   mdlpath : string;
   opam : string;
   opampath : string;
-}
-[@@deriving jsoo]
+} [@@deriving jsoo]
 (** Conversion from [Data_types.val_element] to js object *)
 
 type nonrec vals = val_element list [@@deriving jsoo]
@@ -89,8 +88,7 @@ type nonrec search_result = Data_types.search_result = {
   packages : packages;
   libraries : libraries;
   modules : modules;
-}
-[@@deriving jsoo]
+} [@@deriving jsoo]
 (** Conversion from [Data_types.search_result] to js object *)
 
 type nonrec sources_occurence = Data_types.sources_occurence = {
@@ -100,13 +98,11 @@ type nonrec sources_occurence = Data_types.sources_occurence = {
   occpos: int;
   occline: string;
   occpath: string;
-}
-[@@deriving jsoo]
+} [@@deriving jsoo]
 (** Conversion from [Data_types.sources_occurence] to js object *)
 
 type nonrec sources_search_result = Data_types.sources_search_result = {
   totaloccs : int;
   occs : sources_occurence list
-}
-[@@deriving jsoo]
+} [@@deriving jsoo]
 (** Conversion from [Data_types.sources_search_result] to js object *)
