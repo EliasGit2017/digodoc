@@ -1283,7 +1283,7 @@ td.warning-msg span {
   width                     : 100%;
   background                : linear-gradient(#659CD6, 85%, #F6F6F6);
   margin-bottom             : 10px;
-  border                    : 1px solid #c4c4c4;
+  border                    : 0px solid #c4c4c4;
   padding                   : 20px;
   border-top-left-radius    : 0px;
   border-top-right-radius   : 0px;
@@ -1317,12 +1317,6 @@ td.warning-msg span {
   outline      : none;
 }
 
-#fulltext_last_match_id {
-  height       : 30px;
-  border-radius: 6px;
-  border       : 0px
-}
-
 #update-filters {
   border       : 0;
   cursor       : pointer;
@@ -1348,7 +1342,7 @@ td.warning-msg span {
 }
 
 #result-div {
-  max-width: 100ch;
+  max-width: 110ch;
   width    : 100%;
 }
 
@@ -1813,6 +1807,24 @@ input[type="checkbox"]:checked~input {
   left          : auto;
   display       : none;
   padding       : 0 0px;
+}
+
+/* Fulttext results display*/
+
+.fulltext-ul > li::marker {
+  content: "👉";
+}
+
+.opam-name::after{
+  color: #874aa9;
+}
+
+.f_filename {
+  color: #4CAF50;
+}
+
+.occ-position {
+  margin-left: 2%;
 }
 
 /* Some media queries to handle elements when resizing window */

@@ -1,49 +1,94 @@
- <!-- Fulltext Search -->
+<!-- Fulltext Search -->
 
- <button type="button" id="col_fulltext" class="collapsible-div">Fulltext Search</button>
+<button type="button" id="col_fulltext" class="collapsible-div">Fulltext Search</button>
+<script>
 
- <div id="fulltext-search-content" class="fulltext-form-div" style="display : block">
-   <form class="search-form" id="fulltext-form">
-     <table>
-       <tbody>
-         <tr>
-           <td colspan="2">
-             <label for="fpattern_fulltext">Search pattern:</label>
-             <input type="text" class="fpattern" id="fpattern_fulltext" name="fpattern_element" value=""
-             onfocusin="fadeIn(800)" onfocusout="fadeOut(800)"><br>
-             <div id="this">
-               <div> <code>Inst</code> 1 and other desc </div>
-               <div> <code>Inst</code> 1 and other desc </div>
-               <div> <code>Inst</code> 1 and other desc </div>
-               <div> <code>Inst</code> 1 and other desc </div>
-             </div>
-           </td>
-         </tr>
-         <tr>
-           <td>
-             <label class="switch">
-               <input type="checkbox" id="fregex" checked>
-               <span class="slider round"></span>
-             </label>
-             <label>Pattern or <a style="color: green;">RegEx</a></label>
-           </td>
-         </tr>
-         <tr>
-           <td>
-             <label class="switch">
-               <input type="checkbox" id="fcase_sens" checked>
-               <span class="slider round"></span>
-             </label>
-             <label>Case sensitive ? </label>
-           </td>
-         </tr>
-       </tbody>
-     </table>
-   </form>
- </div>
+  function fadeIn(time) {
+    var el = document.getElementById("regex_instructions");
+    el.style.opacity = 0;
+    el.style.display = "block"; /*not so smooth*/
+
+    var last = +new Date();
+    var tick = function () {
+      el.style.opacity = +el.style.opacity + (new Date() - last) / time;
+      last = +new Date();
+
+      if (+el.style.opacity < 1) {
+        (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16);
+      }
+    };
+
+    tick();
+  }
+
+  function fadeOut(time) {
+    var el = document.getElementById("regex_instructions");
+    el.style.opacity = 1;
+
+    var last = +new Date();
+    var tick = function () {
+      el.style.opacity = +el.style.opacity - (new Date() - last) / time;
+      last = +new Date();
+
+      if (+el.style.opacity > 0) {
+        (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16);
+      }
+      else {
+        el.style.display = "none"; /*kinda okay*/
+      }
+    };
+
+    tick();
+  }
+</script>
+
+<div id="fulltext-search-content" class="fulltext-form-div" style="display : block">
+  <form class="search-form" id="fulltext-form">
+    <table>
+      <tbody>
+        <tr>
+          <td colspan="2">
+            <label for="fpattern_fulltext">Search pattern:</label>
+            <input type="text" class="fpattern" id="fpattern_fulltext" name="fpattern_fulltext" value=""
+              onfocusin="fadeIn(800)" onfocusout="fadeOut(800)"><br>
+            <div id="regex_instructions">
+              <div> <code>x\|y</code> match x or y </div>
+              <div> <code>x\+</code> match x one or more times </div>
+              <div> <code>x\*</code> match x 0 or more times </div>
+              <div> <code>x\?</code> Optionally match x </div>
+              <div> <code>\.</code> match any single char </div>
+              <div> <code>\(x\)</code> group pattern <code>type\( nonrec\)? example</code> </div>
+              <div> <code>\w</code> alphanumeric character shortcut</div>
+              <div> <code>\[aA\]</code> ranges \[a-z\] to match a character from a set </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label class="switch">
+              <input type="checkbox" id="fregex" checked>
+              <span class="slider round"></span>
+            </label>
+            <label>Pattern or <a style="color: green;">RegEx</a></label>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <label class="switch">
+              <input type="checkbox" id="fcase_sens" checked>
+              <span class="slider round"></span>
+            </label>
+            <label>Case sensitive ? </label>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </form>
+
 </div>
 
-<div id="fulltext-nav" style="display: none;">
+<div id="entries-nav" style="display: none;">
+  <!-- Will be used to display results in makefile and dune files-->
   <table>
     <tbody>
       <tr>
@@ -56,10 +101,12 @@
 </div>
 
 <div id="result-div" style="display: none;">
+  <div id="page-info">
+
+  </div>
   <div id="results">
     <ol id="results-list">
 
     </ol>
   </div>
-
 </div>

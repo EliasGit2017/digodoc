@@ -720,8 +720,3 @@ let insert_packsUl_li : packages_jsoo t -> unit  =
     )
     packages
 (** preview packages propositions from which to choose *)
-
-(* let insert_Sources_fulltext : sources_search_result_jsoo t -> unit = 
-   fun (sources : sources_search_result_jsoo t) ->
-   sources *)
-(** Insert Sources results for fulltext search *)

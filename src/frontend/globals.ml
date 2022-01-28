@@ -105,7 +105,7 @@ let unopt (opt : 'a opt) : 'a  =
 
 let concat (str1 : js_string t) (str2 : js_string t) : js_string t =
   str1##concat str2
-(** [concat str1 str2] is the same as [str1##conat str2]. *)
+(** [concat str1 str2] is the same as [str1##concat str2]. *)
 
 let foreach (f : int -> 'a -> unit) (a : 'a js_array t) : unit =
   a##forEach(wrap_callback (fun elt i _ -> f i elt))   

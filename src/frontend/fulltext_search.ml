@@ -113,8 +113,72 @@ let state_to_info state =
 let get_input id = unopt @@ Html.CoerceTo.input @@ get_element_by_id id
 (** Returns an input with given id *)
 
-let show_it : sources_search_result_jsoo t -> unit =
+let set_attr elt attr value =
+  elt##setAttribute (js attr) value
+(** [set_attr elt attr val] sets attribute [attr] of [elt] to [value]. *) 
+
+let append_inner elt str =
+  elt##.innerHTML := concat elt##.innerHTML str
+(** [append_inner elt str] appends [str] to the content of [elt]. *)
+
+let insert_Fulltext_Sources : sources_search_result_jsoo t -> unit =
   fun (result : sources_search_result_jsoo t) ->
+  let current_pattern = unopt @@ Html.CoerceTo.input @@ get_element_by_id "fpattern_fulltext" in
+  let result_div = unopt @@ Html.CoerceTo.div @@ get_element_by_id "result-div" in
+  let res_ol = unopt @@ Html.CoerceTo.ol @@ get_element_by_id "results-list" in
+  let page_info = unopt @@ Html.CoerceTo.div @@ get_element_by_id "page-info" in
+  let occurences_text = Html.createP document in
+
+  page_info##.innerHTML := js "";
+  res_ol##.innerHTML := js "";
+
+  if not @@ ((to_string current_pattern##.value##trim) = "")
+  then
+    begin
+      result_div##.style##.display := js "block";
+      occurences_text##.innerHTML := js (Printf.sprintf "<b>%d</b> results found for <b>%s<b>" result##.totaloccs (to_string current_pattern##.value##trim));
+      occurences_text##.style##.textAlign := js "center";
+      Dom.appendChild page_info occurences_text;
+
+      foreach
+        (fun _ elt ->
+           let source_occ_ul = Html.createUl document in
+           let occ_position = Html.createA document in
+           let occ_line = Html.createCode document in
+           let line1 = Html.createLi document in
+           let line2 = Html.createLi document in
+           let opam_name_span = Html.createA document in
+           let opam_ns_href = concat (concat path_to_root  elt##.srcpath) (js "/index.html") in
+           let occu_path_href = (concat path_to_root elt##.occpath) in
+           let filename = Html.createSpan document in
+           (* let pre_code = Html.createPre document in   ---> used to try highlight.js*)
+           set_attr source_occ_ul "class" (js "fulltext-ul");
+           set_attr opam_name_span "class" (js "opam-name");
+           set_attr opam_name_span "href" opam_ns_href;
+           append_inner line1 (js " In ");
+           append_inner opam_name_span elt##.opamname;
+           Dom.appendChild line1 opam_name_span;
+           append_inner line1 (js " in ");
+           set_attr filename "class" (js "f_filename");
+           append_inner filename elt##.filename;
+           Dom.appendChild line1 filename;
+           Dom.appendChild source_occ_ul line1;
+           set_attr occ_position "class" (js "occ-position");
+           append_inner occ_position (js (string_of_int elt##.occpos));
+           set_attr occ_position "href" occu_path_href;
+           occ_line##.style##.marginLeft := js "2%";
+           (* set_attr occ_line "class" (js "language-ocaml"); *)
+           append_inner occ_line elt##.occline;
+           (* Dom.appendChild pre_code occ_line; *)
+           Dom.appendChild line2 occ_position;
+           Dom.appendChild line2 occ_line;
+           Dom.appendChild source_occ_ul line2;
+           Dom.appendChild res_ol source_occ_ul;
+        )
+        result##.occs
+    end
+  else result_div##.style##.display := js "none";
+  Headfoot.footerHandler ();
   logs @@ string_of_int @@ result##.totaloccs
 (** ok *)
 
@@ -124,7 +188,7 @@ let preview_fulltext_source pattern =
     files = ML;
     is_regex = true;
     is_case_sensitive = true;
-    last_match_id = 10;
+    last_match_id = 0;
   } in
   Lwt.async @@
   Requests.send_generic_request
@@ -136,7 +200,7 @@ let preview_fulltext_source pattern =
               show_it (Objects.sources_search_result_to_jsoo result);
            | _ -> raise @@ web_app_error "problem in preview sources fulltext"
            end; *)
-        show_it (Objects.sources_search_result_to_jsoo sources_results);
+        insert_Fulltext_Sources (Objects.sources_search_result_to_jsoo sources_results);
         Lwt.return_unit
       )
     ~error:(fun err ->
@@ -166,13 +230,14 @@ let set_handlers () =
       let cur_input_value = fulltext_form##.value##trim in
       begin
         match Option.map to_string @@ Optdef.to_option @@ kbevent##.key with
-        | Some "Space" -> logs "just pressed spacebar";    
+        | Some "Space" -> 
+            logs "just pressed spacebar";
+            preview_fulltext_source @@ (to_string cur_input_value);    
         | _ -> preview_fulltext_source @@ (to_string cur_input_value);
-        (* give_this_to_logs @@ state_to_info @@ !search_state; *)
       end;
       _false
     )
-(** Trying to query api *)
+(** Query search-api and display result 20 by 20 *)
 
 let initialise_state () =
   let args = Url.Current.arguments in
@@ -190,7 +255,8 @@ let onload () =
   set_handlers ();
   initialise_state ();
   uninitialized_page ()
-  (* match !search_state with
-     | Uninitialized -> uninitialized_page ()
-     | _ -> fulltext_page () *)
-  (* Onload handler for fulltext search page *)
+(* match !search_state with
+   | Uninitialized -> uninitialized_page ()
+   | _ -> fulltext_page () *)
+(* Onload handler for fulltext search page *)
+(* Onload handler for fulltext search page *)
