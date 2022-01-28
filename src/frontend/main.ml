@@ -70,8 +70,8 @@ let main () =
     )
   in
   let fulltextHandler = (fun () ->
-      let%lwt () = Fulltext_search.onload () in 
-      Search.onload ()
+      let%lwt () = Search.onload () in 
+      Fulltext_search.onload () 
     )
   in
   (* footer handler when resized *)

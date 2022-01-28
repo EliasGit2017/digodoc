@@ -222,8 +222,21 @@ let set_handlers () =
         | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens;
       end;
       _false
+    );
+  (** Query search-api and display result 20 by 20 *)
+
+  fulltext_form##.onmouseover := Html.handler (fun _ ->
+      let regex_inst = unopt @@ Html.CoerceTo.div @@ get_element_by_id "regex_instructions" in
+      logs "mouse over this";
+      _false
+    );
+  (** Mouse over text entry *)
+
+  fulltext_form##.onmouseout := Html.handler (fun _ ->
+      logs "mouse quitting this";
+      _false
     )
-(** Query search-api and display result 20 by 20 *)
+(** Mouseout *)
 
 let initialise_state () =
   let args = Url.Current.arguments in

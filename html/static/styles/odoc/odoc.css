@@ -1812,7 +1812,8 @@ input[type="checkbox"]:checked~input {
 /* Fulttext results display*/
 
 .fulltext-ul>li::marker {
-  content: "👉";
+  /* content: "👉"; */
+  content: "🐪";
 }
 
 .opam-name::after {
