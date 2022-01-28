@@ -1811,11 +1811,11 @@ input[type="checkbox"]:checked~input {
 
 /* Fulttext results display*/
 
-.fulltext-ul > li::marker {
+.fulltext-ul>li::marker {
   content: "👉";
 }
 
-.opam-name::after{
+.opam-name::after {
   color: #874aa9;
 }
 
@@ -1833,6 +1833,7 @@ input[type="checkbox"]:checked~input {
   .toc {
     top: calc(10 * var(--size-line));
   }
+
   /*Put table of content at the level of letter selection*/
   .content {
     padding-left: calc(7.5 * var(--size-line));

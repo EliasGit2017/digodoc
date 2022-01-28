@@ -1,6 +1,6 @@
 (**************************************************************************)
 (*                                                                        *)
-(*  Copyright (c) 2021 OCamlPro SAS & Origin Labs SAS                     *)
+(*  Copyright (c) 2022 OCamlPro SAS & Origin Labs SAS                     *)
 (*                                                                        *)
 (*  All rights reserved.                                                  *)
 (*  This file is distributed under the terms of the GNU Lesser General    *)
@@ -182,24 +182,18 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> unit =
   logs @@ string_of_int @@ result##.totaloccs
 (** ok *)
 
-let preview_fulltext_source pattern =
+let preview_fulltext_source pattern regex case_sens =
   let fulltext_info = {
     pattern;
     files = ML;
-    is_regex = true;
-    is_case_sensitive = true;
+    is_regex = regex;
+    is_case_sensitive = case_sens;
     last_match_id = 0;
   } in
   Lwt.async @@
   Requests.send_generic_request
     ~request:(Requests.getSources_fulltext @@ fulltext_search_state_to_sources_search_info @@ fulltext_info)
     ~callback:(fun sources_results ->
-        (* begin
-           match sources_results with
-           | result ->
-              show_it (Objects.sources_search_result_to_jsoo result);
-           | _ -> raise @@ web_app_error "problem in preview sources fulltext"
-           end; *)
         insert_Fulltext_Sources (Objects.sources_search_result_to_jsoo sources_results);
         Lwt.return_unit
       )
@@ -213,27 +207,19 @@ let preview_fulltext_source pattern =
       )
 (** Request to get sources fulltext result *)
 
-(* let give_this_to_logs query_data =
-   Requests.send_generic_request
-    ~request:(Requests.getSources_fulltext query_data)
-    ~callback:(fun sources_data ->
-        show_it (Objects.sources_search_result_to_jsoo sources_data);
-        Lwt.return_unit
-      )
-    () *)
-(** ok *)
-
 let set_handlers () =
   let fulltext_form = unopt @@ Html.CoerceTo.input @@ get_element_by_id "fpattern_fulltext" in
 
   fulltext_form##.onkeyup := Html.handler (fun kbevent ->
       let cur_input_value = fulltext_form##.value##trim in
+      let is_regex = to_bool @@ (get_input "fregex")##.checked in
+      let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
       begin
         match Option.map to_string @@ Optdef.to_option @@ kbevent##.key with
         | Some "Space" -> 
             logs "just pressed spacebar";
-            preview_fulltext_source @@ (to_string cur_input_value);    
-        | _ -> preview_fulltext_source @@ (to_string cur_input_value);
+            preview_fulltext_source (to_string cur_input_value) is_regex case_sens;   
+        | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens;
       end;
       _false
     )
@@ -258,5 +244,4 @@ let onload () =
 (* match !search_state with
    | Uninitialized -> uninitialized_page ()
    | _ -> fulltext_page () *)
-(* Onload handler for fulltext search page *)
 (* Onload handler for fulltext search page *)
