@@ -18,18 +18,6 @@ open Utils
 
 open Objects
 
-(* module OrderedSource = struct
-   type t = Data_types.file_type
-   let compare e1 e2 =
-    match e1, e2 with
-    | x, y when x = y -> 0
-    | ML, _ | DUNE, MAKEFILE -> -1
-    | _ -> 1
-   end *)
-(** Odered source type *)
-
-(* module SourceSet = Set.Make(OrderedSource) *)
-(** Set of sources *)
 
 type fulltext_search_state = {
   mutable pattern : string;
@@ -115,7 +103,11 @@ let get_input id = unopt @@ Html.CoerceTo.input @@ get_element_by_id id
 
 let set_attr elt attr value =
   elt##setAttribute (js attr) value
-(** [set_attr elt attr val] sets attribute [attr] of [elt] to [value]. *) 
+(** [set_attr elt attr val] sets attribute [attr] of [elt] to [value]. *)
+
+let get_attr elt attr =
+  elt##getAttribute (js attr)
+(** [get_attr elt attr] retrieves attribute [attr] of [elt] *)
 
 let append_inner elt str =
   elt##.innerHTML := concat elt##.innerHTML str
@@ -143,37 +135,70 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> unit =
       foreach
         (fun _ elt ->
            let source_occ_ul = Html.createUl document in
-           let occ_position = Html.createA document in
+           (* let occ_position = Html.createA document in *)
            let occ_line = Html.createCode document in
            let line1 = Html.createLi document in
            let line2 = Html.createLi document in
+           let line2_div = Html.createDiv document in
+           let line2_a = Html.createA document in
+           let line2_a_div = Html.createDiv document in
+           let line2_a_div_tab = Html.createTable document in
+           let line2_a_div_tab_body = Html.createTbody document in
+           let line2_a_div_tab_tr = Html.createTr document in
+           let line2_a_div_tab_tr_td1 = Html.createTd document in
+           let line2_a_div_tab_tr_td2 = Html.createTd document in
            let opam_name_span = Html.createA document in
            let opam_ns_href = concat (concat path_to_root  elt##.srcpath) (js "/index.html") in
            let occu_path_href = (concat path_to_root elt##.occpath) in
            let filename = Html.createSpan document in
-           (* let pre_code = Html.createPre document in   ---> used to try highlight.js*)
+
            set_attr source_occ_ul "class" (js "fulltext-ul");
            set_attr opam_name_span "class" (js "opam-name");
            set_attr opam_name_span "href" opam_ns_href;
            append_inner line1 (js " In ");
            append_inner opam_name_span elt##.opamname;
+
            Dom.appendChild line1 opam_name_span;
+
            append_inner line1 (js " in ");
            set_attr filename "class" (js "f_filename");
            append_inner filename elt##.filename;
+
            Dom.appendChild line1 filename;
            Dom.appendChild source_occ_ul line1;
-           set_attr occ_position "class" (js "occ-position");
-           append_inner occ_position (js (string_of_int elt##.occpos));
-           set_attr occ_position "href" occu_path_href;
-           occ_line##.style##.marginLeft := js "2%";
-           (* set_attr occ_line "class" (js "language-ocaml"); *)
+
+           set_attr line2_div "class" (js "link-to-docs-sources");
+           (* line2_div##.style##.marginTop := js "7px"; *)
+           set_attr line2_a_div_tab_tr_td1 "class" (js "occ-position");
+           append_inner line2_a_div_tab_tr_td1 (js (string_of_int elt##.occpos));
+
+           set_attr line2_a_div_tab_tr_td2 "class" (js "no_underline");
            append_inner occ_line elt##.occline;
-           (* Dom.appendChild pre_code occ_line; *)
-           Dom.appendChild line2 occ_position;
-           Dom.appendChild line2 occ_line;
+           Dom.appendChild line2_a_div_tab_tr_td2 occ_line;
+
+           append_inner line2_a_div_tab_tr (js "At line ");
+           line2_a_div_tab_tr##.style##.marginLeft := js "2%";
+
+           Dom.appendChild line2_a_div_tab_tr line2_a_div_tab_tr_td1;
+           append_inner line2_a_div_tab_tr (js " ");
+           Dom.appendChild line2_a_div_tab_tr line2_a_div_tab_tr_td2;
+
+
+           Dom.appendChild line2_a_div_tab_body line2_a_div_tab_tr;
+           Dom.appendChild line2_a_div_tab line2_a_div_tab_body;
+           Dom.appendChild line2_a_div line2_a_div_tab;
+
+           set_attr line2_a "href" occu_path_href;
+           set_attr line2_a "class" (js "no_underline no_underline.wide");
+
+           line2_a_div##.style##.marginTop := js "0%";
+
+           Dom.appendChild line2_a line2_a_div;
+           Dom.appendChild line2_div line2_a;
+           Dom.appendChild line2 line2_div;
+
            Dom.appendChild source_occ_ul line2;
-           Dom.appendChild res_ol source_occ_ul;
+           Dom.appendChild res_ol source_occ_ul;            
         )
         result##.occs
     end
@@ -226,17 +251,36 @@ let set_handlers () =
   (** Query search-api and display result 20 by 20 *)
 
   fulltext_form##.onmouseover := Html.handler (fun _ ->
+      let time = 800. in
       let regex_inst = unopt @@ Html.CoerceTo.div @@ get_element_by_id "regex_instructions" in
+      set_attr regex_inst "opacity" (js "0");
+      set_attr regex_inst "display" (js "block");
+      let last = ref Js.date##now in
+
+      let rec tick () =
+        begin
+          set_attr regex_inst "opacity" (js (string_of_float ((float_of_string (to_string (unopt @@ (get_attr regex_inst "opacity")))) +. ((Js.date##now -. !last) /. time)))) ;
+          last := Js.date##now;
+          if (float_of_string (to_string (unopt @@ (get_attr regex_inst "opacity"))) < 1.)
+          then
+            begin
+              logs "opacity < 1.";
+              let _ = window##requestAnimationFrame(Js.wrap_callback (fun _ev -> tick ())) in ()
+            end
+          else ()
+        end;
+      in
+      tick();
       logs "mouse over this";
       _false
     );
-  (** Mouse over text entry *)
+  (** Mouse over text entry animation *)
 
   fulltext_form##.onmouseout := Html.handler (fun _ ->
       logs "mouse quitting this";
       _false
     )
-(** Mouseout *)
+(** Mouseout of text entry *)
 
 let initialise_state () =
   let args = Url.Current.arguments in

@@ -1811,6 +1811,11 @@ input[type="checkbox"]:checked~input {
 
 /* Fulttext results display*/
 
+.fulltext-ul {
+  border       : 1px solid #3a89ce;
+  border-radius: 5px;
+}
+
 .fulltext-ul>li::marker {
   /* content: "👉"; */
   content: "🐪";
@@ -1826,6 +1831,19 @@ input[type="checkbox"]:checked~input {
 
 .occ-position {
   margin-left: 2%;
+}
+
+.no_underline {
+  text-decoration: none;
+}
+
+.link-to-docs-sources {
+  margin-top: -10px;
+}
+
+.link-to-docs-sources:hover {
+  border-radius   : 5px;
+  background-color: #dddddd;
 }
 
 /* Some media queries to handle elements when resizing window */

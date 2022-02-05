@@ -408,6 +408,7 @@
     overflow-y  : auto;
   }
 
+  /* Highlight line number in sourcers after being redirected from fulltext_search.html page*/
   :target {
     background-color  : orange;
     transition: background-color 1s linear;
@@ -415,3 +416,4 @@
     -moz-transition: background-color 1s linear;
     -o-transition: background-color 1s linear;
   }
+  
