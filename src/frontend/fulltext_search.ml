@@ -255,8 +255,6 @@ let set_handlers () =
       let regex_inst = unopt @@ Html.CoerceTo.div @@ get_element_by_id "regex_instructions" in
       regex_inst##.style##.opacity := (js "0") |> Js.Optdef.return;
       regex_inst##.style##.display := js "block";
-      (* logs (to_string @@ unoptdef @@ regex_inst##.style##.opacity);
-      logs "printed opacity"; *)
       let last = ref Js.date##now in
 
       let rec tick () =
@@ -270,7 +268,8 @@ let set_handlers () =
       tick ();
       _false
     );
-  (** Mouse over text entry animation *)
+  (** Shows regex instructions when pointer is over the text entry form [fulltext-form] (proceeds by slowly increasing opacity
+      for [time] ms after div [regex_instructions]'s display style option is set to block) *)
 
   fulltext_form##.onpointerleave := Html.handler (fun _ ->
       let time = 800. in
@@ -279,18 +278,19 @@ let set_handlers () =
       let last = ref Js.date##now in
 
       let rec tick () =
-          let updated_opacity = (js (string_of_float ((float_of_string (to_string (unoptdef @@ regex_inst##.style##.opacity))) -. ((Js.date##now -. !last) /. time)))) in
-          regex_inst##.style##.opacity := updated_opacity |> Js.Optdef.return;
-          last := Js.date##now;
-          if ((float_of_string (to_string updated_opacity)) > 0.)
-          then window##requestAnimationFrame(Js.wrap_callback (fun _ -> tick ())) |> ignore
-          else regex_inst##.style##.display := js "none"
+        let updated_opacity = (js (string_of_float ((float_of_string (to_string (unoptdef @@ regex_inst##.style##.opacity))) -. ((Js.date##now -. !last) /. time)))) in
+        regex_inst##.style##.opacity := updated_opacity |> Js.Optdef.return;
+        last := Js.date##now;
+        if ((float_of_string (to_string updated_opacity)) > 0.)
+        then window##requestAnimationFrame(Js.wrap_callback (fun _ -> tick ())) |> ignore
+        else regex_inst##.style##.display := js "none"
       in
 
       tick ();
       _false
     )
-(** Mouseout of text entry *)
+(** Hides regex instructions when pointer leaves the text entry form [fulltext-form] (proceeds by slowly decreasing opacity
+    for [time] ms and sets div [regex_instructions]'s display style option to none when opacity gets to 0) *)
 
 
 let initialise_state () =
