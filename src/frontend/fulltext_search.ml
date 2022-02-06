@@ -105,10 +105,6 @@ let set_attr elt attr value =
   elt##setAttribute (js attr) value
 (** [set_attr elt attr val] sets attribute [attr] of [elt] to [value]. *)
 
-let get_attr elt attr =
-  elt##getAttribute (js attr)
-(** [get_attr elt attr] retrieves attribute [attr] of [elt] *)
-
 let append_inner elt str =
   elt##.innerHTML := concat elt##.innerHTML str
 (** [append_inner elt str] appends [str] to the content of [elt]. *)
