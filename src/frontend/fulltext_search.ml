@@ -250,61 +250,44 @@ let set_handlers () =
     );
   (** Query search-api and display result 20 by 20 *)
 
-  (** The two following functions are bad ... really playing on my nerves as requestAnimationFrame is not taken in consideration *)
   fulltext_form##.onpointerenter := Html.handler (fun _ ->
       let time = 800. in
       let regex_inst = unopt @@ Html.CoerceTo.div @@ get_element_by_id "regex_instructions" in
       regex_inst##.style##.opacity := (js "0") |> Js.Optdef.return;
-      set_attr regex_inst "opacity" (js "0");
       regex_inst##.style##.display := js "block";
+      (* logs (to_string @@ unoptdef @@ regex_inst##.style##.opacity);
+      logs "printed opacity"; *)
       let last = ref Js.date##now in
 
       let rec tick () =
-        begin
-          let tmp = (js (string_of_float ((float_of_string (to_string (unopt @@ (get_attr regex_inst "opacity")))) +. ((Js.date##now -. !last) /. time)))) in
-          regex_inst##.style##.opacity := tmp |> Js.Optdef.return;
-          set_attr regex_inst "opacity" tmp;
-          last := Js.date##now;
-          if (float_of_string (to_string (unopt @@ (get_attr regex_inst "opacity"))) < 1.)
-          then
-            begin
-              logs "opacity < 1.";
-              window##requestAnimationFrame(Js.wrap_callback (fun _ -> tick ())) |> ignore;
-            end
-            (* else regex_inst##.style##.display := js "block" *)
-        end
+        let updated_opacity = (js (string_of_float ((float_of_string (to_string (unoptdef @@ regex_inst##.style##.opacity))) +. ((Js.date##now -. !last) /. time)))) in
+        regex_inst##.style##.opacity := updated_opacity |> Js.Optdef.return;
+        last := Js.date##now;
+        if ((float_of_string (to_string updated_opacity)) < 1.)
+        then window##requestAnimationFrame(Js.wrap_callback (fun _ -> tick ())) |> ignore;
       in
 
-      tick (); 
-      logs "mouse over regex_instructions";
+      tick ();
       _false
     );
   (** Mouse over text entry animation *)
 
-
   fulltext_form##.onpointerleave := Html.handler (fun _ ->
       let time = 800. in
       let regex_inst = unopt @@ Html.CoerceTo.div @@ get_element_by_id "regex_instructions" in
-      set_attr regex_inst "opacity" (js "1");
+      regex_inst##.style##.opacity := (js "1") |> Js.Optdef.return;
       let last = ref Js.date##now in
 
-      let rec tick _ =
-        begin
-          let tmp = (js (string_of_float ((float_of_string (to_string (unopt @@ (get_attr regex_inst "opacity")))) -. ((Js.date##now -. !last) /. time)))) in
-          regex_inst##.style##.opacity := tmp |> Js.Optdef.return;
-          set_attr regex_inst "opacity" tmp;
+      let rec tick () =
+          let updated_opacity = (js (string_of_float ((float_of_string (to_string (unoptdef @@ regex_inst##.style##.opacity))) -. ((Js.date##now -. !last) /. time)))) in
+          regex_inst##.style##.opacity := updated_opacity |> Js.Optdef.return;
           last := Js.date##now;
-          if (float_of_string (to_string (unopt @@ (get_attr regex_inst "opacity"))) > 0.)
-          then
-            begin
-              logs "opacity < 1.";
-              window##requestAnimationFrame(Js.wrap_callback tick) |> ignore;
-            end
+          if ((float_of_string (to_string updated_opacity)) > 0.)
+          then window##requestAnimationFrame(Js.wrap_callback (fun _ -> tick ())) |> ignore
           else regex_inst##.style##.display := js "none"
-        end
       in
-      window##requestAnimationFrame(Js.wrap_callback tick) |> ignore;
-      logs "mouse quitting regex_instructions";
+
+      tick ();
       _false
     )
 (** Mouseout of text entry *)
