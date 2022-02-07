@@ -62,6 +62,7 @@ let append_inner elt str =
 
 let insert_Fulltext_Sources : sources_search_result_jsoo t -> bool -> unit =
   fun (result : sources_search_result_jsoo t) b ->
+  let load_more_btn = unopt @@ Html.CoerceTo.button @@ get_element_by_id "load_more" in
   let current_pattern = unopt @@ Html.CoerceTo.input @@ get_element_by_id "fpattern_fulltext" in
   let result_div = unopt @@ Html.CoerceTo.div @@ get_element_by_id "result-div" in
   let res_ol = unopt @@ Html.CoerceTo.ol @@ get_element_by_id "results-list" in
@@ -151,11 +152,15 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> bool -> unit =
            Dom.appendChild line2 line2_div;
 
            Dom.appendChild source_occ_ul line2;
-           Dom.appendChild res_ol source_occ_ul;            
+           Dom.appendChild res_ol source_occ_ul;         
         )
         result##.occs
     end
-  else result_div##.style##.display := js "none";
+  else
+    begin
+      result_div##.style##.display := js "none";
+      load_more_btn##.style##.display := js "none"
+    end;
   Headfoot.footerHandler ();
   logs @@ string_of_int @@ result##.totaloccs
 (** ok *)
