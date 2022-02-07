@@ -14,8 +14,6 @@ open Js_of_ocaml
 open Js
 open Globals
 open Data_types
-open Utils
-
 open Objects
 
 
@@ -45,50 +43,6 @@ let state = {
 let search_state = ref state
 (** Global variable that stores state of fulltext search page *)
 
-let state_of_args args = 
-  match List.assoc "search" args with
-  | "fulltext" ->
-      let state = {
-        pattern = "";
-        files = ML;
-        is_regex = true;
-        is_case_sensitive = true;
-        last_match_id = 10
-      }
-      in
-      List.iter (fun (key, elt) ->
-          match key with
-          | "search" -> ()
-          | "pattern" -> state.pattern <- decode_query_val elt
-          | "files" -> state.files <- file_type_of_string elt
-          | "is_regex" -> (match elt with "text" -> state.is_regex <- false | _ -> state.is_regex <- true)
-          | "is_case_sensitive" -> (match elt with "aA" -> state.is_case_sensitive <- true | _ -> state.is_case_sensitive <- false)
-          | "last_match_id" -> state.last_match_id <- int_of_string elt
-          | _ -> raise @@ web_app_error (Printf.sprintf "state_of_args: key %s is not recognised" key)
-        )
-        args;
-      FulltextSearch state
-  | s -> raise @@ web_app_error (Printf.sprintf "state_of_args: search type %s is not recognised in fulltext search" s)
-(** State_of_args *)
-
-let state_to_args state =
-  match state with
-  | Uninitialized -> ""
-  | FulltextSearch {pattern; files; is_regex; is_case_sensitive; last_match_id} ->
-      Printf.sprintf "search=fulltext&pattern=%s&files=%s&is_regex=%s&is_case_sensitive=%s&last_match_id=%d"
-        (encode_query_val pattern)
-        (file_type_to_string files)
-        (if is_regex then "yes" else "text")
-        (if is_case_sensitive then "aA" else "no")
-        last_match_id
-(** [state_to_args state] constructs query string from search state [state] *)
-
-(* let get_fulltext_search_state () =
-   match !search_state with
-   | FulltextSearch state -> state
-   | _ -> raise @@ web_app_error "get_fulltext_search_state : current state can't be retrieved (may not be a fulltext_search_state)" *)
-(** Get fulltext_search state from search state. Raises [Web_app_error] if current state isn't an entry state. *)
-
 let fulltext_search_state_to_sources_search_info {pattern; files; is_regex; is_case_sensitive; last_match_id} =
   let open Data_types in
   {
@@ -99,13 +53,6 @@ let fulltext_search_state_to_sources_search_info {pattern; files; is_regex; is_c
     last_match_id = last_match_id;
   }
 (** Converts [fulltext_search_state] to [Data_types.sources_search_info] *)
-
-(* let state_to_info state =
-   match state with
-   | Uninitialized -> raise @@ web_app_error "state_to_info: couldn't get info from uninitialized search for fulltext search"
-   | FulltextSearch state -> (fulltext_search_state_to_sources_search_info state) *)
-(** Converts [search_state] to [Data_types.info].
-    Raises [Web_app_error] if current state is uninitialised. *)
 
 let get_input id = unopt @@ Html.CoerceTo.input @@ get_element_by_id id
 (** Returns an input with given id *)
@@ -414,12 +361,7 @@ let set_handlers () =
       preview_fulltext_source (to_string cur_input_value) is_regex case_sens true;
       _false
     )
-
-(* let initialise_state () =
-   let args = Url.Current.arguments in
-   if args != []
-   then search_state := state_of_args args *)
-(** Initialises state by looking up current URL arguments (query string) *)
+(** Loads at most the 20 next results if available *)
 
 let uninitialized_page () =
   let forms = get_element_by_id "forms" in
@@ -429,9 +371,5 @@ let uninitialized_page () =
 
 let onload () =
   set_handlers ();
-  (* initialise_state (); *)
   uninitialized_page ()
-(* match !search_state with
-   | Uninitialized -> uninitialized_page ()
-   | _ -> fulltext_page () *)
 (* Onload handler for fulltext search page *)
