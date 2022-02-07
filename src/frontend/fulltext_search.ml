@@ -26,11 +26,6 @@ type fulltext_search_state = {
 }
 (** State for fulltext search *)
 
-type search_state = 
-  | Uninitialized
-  | FulltextSearch of fulltext_search_state
-  (** Search state type within fulltext search page *)
-
 let state = {
   pattern = "";
   files = ML;
@@ -302,6 +297,7 @@ let set_handlers () =
             preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;   
         | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
       end;
+      load_more_btn##.style##.display := js "block";
       _false
     );
   (** Query search-api and display result 20 by 20 *)
@@ -358,6 +354,7 @@ let set_handlers () =
       let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
       let current_last = !search_state.last_match_id in
       state.last_match_id <- current_last + 20;
+      logs @@ string_of_int @@ current_last;
       preview_fulltext_source (to_string cur_input_value) is_regex case_sens true;
       _false
     )
