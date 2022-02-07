@@ -118,24 +118,29 @@ let append_inner elt str =
   elt##.innerHTML := concat elt##.innerHTML str
 (** [append_inner elt str] appends [str] to the content of [elt]. *)
 
-let insert_Fulltext_Sources : sources_search_result_jsoo t -> unit =
-  fun (result : sources_search_result_jsoo t) ->
+let insert_Fulltext_Sources : sources_search_result_jsoo t -> bool -> unit =
+  fun (result : sources_search_result_jsoo t) b ->
   let current_pattern = unopt @@ Html.CoerceTo.input @@ get_element_by_id "fpattern_fulltext" in
   let result_div = unopt @@ Html.CoerceTo.div @@ get_element_by_id "result-div" in
   let res_ol = unopt @@ Html.CoerceTo.ol @@ get_element_by_id "results-list" in
   let page_info = unopt @@ Html.CoerceTo.div @@ get_element_by_id "page-info" in
   let occurences_text = Html.createP document in
 
-  page_info##.innerHTML := js "";
-  res_ol##.innerHTML := js "";
-
-  if not @@ ((to_string current_pattern##.value##trim) = "")
+  if not b
   then
     begin
+      page_info##.innerHTML := js "";
+      res_ol##.innerHTML := js "";
+
       result_div##.style##.display := js "block";
       occurences_text##.innerHTML := js (Printf.sprintf "<b>%d</b> results found for <b>%s<b>" result##.totaloccs (to_string current_pattern##.value##trim));
       occurences_text##.style##.textAlign := js "center";
       Dom.appendChild page_info occurences_text;
+    end;
+
+  if not @@ ((to_string current_pattern##.value##trim) = "")
+  then
+    begin
 
       foreach
         (fun _ elt ->
@@ -179,9 +184,10 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> unit =
 
            set_attr line2_a_div_tab_tr_td2 "class" (js "no_underline");
            append_inner occ_line elt##.occline;
+           occ_line##.style##.color := js "black";
            Dom.appendChild line2_a_div_tab_tr_td2 occ_line;
 
-           append_inner line2_a_div_tab_tr (js "At line &nbsp");
+           append_inner line2_a_div_tab_tr (js "&nbsp At line &nbsp");
            line2_a_div_tab_tr##.style##.marginLeft := js "2%";
 
            Dom.appendChild line2_a_div_tab_tr line2_a_div_tab_tr_td1;
@@ -212,7 +218,7 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> unit =
   logs @@ string_of_int @@ result##.totaloccs
 (** ok *)
 
-let preview_fulltext_source pattern regex case_sens =
+let preview_fulltext_source pattern regex case_sens loadmore =
   let handle_checkbox id state =
     let target =
       match id with
@@ -239,7 +245,7 @@ let preview_fulltext_source pattern regex case_sens =
   Requests.send_generic_request
     ~request:(Requests.getSources_fulltext @@ fulltext_search_state_to_sources_search_info @@ fulltext_info)
     ~callback:(fun sources_results ->
-        insert_Fulltext_Sources (Objects.sources_search_result_to_jsoo sources_results);
+        insert_Fulltext_Sources (Objects.sources_search_result_to_jsoo sources_results) loadmore;
         Lwt.return_unit
       )
     ~error:(fun err ->
@@ -257,23 +263,29 @@ let set_handlers () =
   let ml_switch = get_input "fcase_ftype_ml" in
   let dune_switch = get_input "fcase_ftype_dune" in
   let mkfile_switch = get_input "fcase_ftype_makefile" in
+  let load_more_btn = unopt @@ Html.CoerceTo.button @@ get_element_by_id "load_more" in
 
   ml_switch##.onchange := Html.handler ( fun _ ->
       let cur_input_value = fulltext_form##.value##trim in
       let is_regex = to_bool @@ (get_input "fregex")##.checked in
       let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
+      state.last_match_id <- 0;
       if to_bool ml_switch##.checked
       then
         begin
           dune_switch##.checked := _false;
           mkfile_switch##.checked := _false;
-          preview_fulltext_source (to_string cur_input_value) is_regex case_sens
+          preview_fulltext_source (to_string cur_input_value) is_regex case_sens false
         end
       else
         begin
           (* Must select one type of files to perform fulltext search, ML by default *)
           if ((not @@ to_bool dune_switch##.checked) && (not @@ to_bool mkfile_switch##.checked))
-          then ml_switch##.checked := _true
+          then
+            begin
+              ml_switch##.checked := _true;
+              preview_fulltext_source (to_string cur_input_value) is_regex case_sens false
+            end
         end;
       _false
     );
@@ -283,18 +295,23 @@ let set_handlers () =
       let cur_input_value = fulltext_form##.value##trim in
       let is_regex = to_bool @@ (get_input "fregex")##.checked in
       let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
+      state.last_match_id <- 0;
       if to_bool dune_switch##.checked
       then
         begin
           ml_switch##.checked := _false;
           mkfile_switch##.checked := _false;
-          preview_fulltext_source (to_string cur_input_value) is_regex case_sens
+          preview_fulltext_source (to_string cur_input_value) is_regex case_sens false
         end
       else
         begin
           (* Must select one type of files to perform fulltext search, ML by default *)
           if ((not @@ to_bool ml_switch##.checked) && (not @@ to_bool mkfile_switch##.checked))
-          then ml_switch##.checked := _true
+          then
+            begin
+              ml_switch##.checked := _true;
+              preview_fulltext_source (to_string cur_input_value) is_regex case_sens false
+            end
         end;
       _false
     );
@@ -304,18 +321,23 @@ let set_handlers () =
       let cur_input_value = fulltext_form##.value##trim in
       let is_regex = to_bool @@ (get_input "fregex")##.checked in
       let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
+      state.last_match_id <- 0;
       if to_bool mkfile_switch##.checked
       then
         begin
           ml_switch##.checked := _false;
           dune_switch##.checked := _false;
-          preview_fulltext_source (to_string cur_input_value) is_regex case_sens
+          preview_fulltext_source (to_string cur_input_value) is_regex case_sens false
         end
       else
         begin
           (* Must select one type of files to perform fulltext search, ML by default *)
           if ((not @@ to_bool dune_switch##.checked) && (not @@ to_bool ml_switch##.checked))
-          then ml_switch##.checked := _true
+          then
+            begin
+              ml_switch##.checked := _true;
+              preview_fulltext_source (to_string cur_input_value) is_regex case_sens false
+            end
         end;
       _false
     );
@@ -325,13 +347,13 @@ let set_handlers () =
       let cur_input_value = fulltext_form##.value##trim in
       let is_regex = to_bool @@ (get_input "fregex")##.checked in
       let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
-
+      state.last_match_id <- 0;
       begin
         match Option.map to_string @@ Optdef.to_option @@ kbevent##.key with
         | Some "Space" -> 
             logs "user just pressed spacebar";
-            preview_fulltext_source (to_string cur_input_value) is_regex case_sens;   
-        | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens;
+            preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;   
+        | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
       end;
       _false
     );
@@ -379,10 +401,19 @@ let set_handlers () =
 
       tick ();
       _false
-    )
-(** Hides regex instructions when pointer leaves the text entry form [fulltext-form] (proceeds by slowly decreasing opacity
-    for [time] ms and sets div [regex_instructions]'s display style option to none when opacity gets to 0) *)
+    );
+  (** Hides regex instructions when pointer leaves the text entry form [fulltext-form] (proceeds by slowly decreasing opacity
+      for [time] ms and sets div [regex_instructions]'s display style option to none when opacity gets to 0) *)
 
+  load_more_btn##.onclick := Html.handler (fun _ ->
+      let cur_input_value = fulltext_form##.value##trim in
+      let is_regex = to_bool @@ (get_input "fregex")##.checked in
+      let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
+      let current_last = !search_state.last_match_id in
+      state.last_match_id <- current_last + 20;
+      preview_fulltext_source (to_string cur_input_value) is_regex case_sens true;
+      _false
+    )
 
 (* let initialise_state () =
    let args = Url.Current.arguments in
