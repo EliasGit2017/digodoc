@@ -33,7 +33,16 @@ type search_state =
   | FulltextSearch of fulltext_search_state
   (** Search state type within fulltext search page *)
 
-let search_state = ref Uninitialized
+let state = {
+  pattern = "";
+  files = ML;
+  is_regex = true;
+  is_case_sensitive = true;
+  last_match_id = 0
+}
+(** Default search_state update through deref *)
+
+let search_state = ref state
 (** Global variable that stores state of fulltext search page *)
 
 let state_of_args args = 
@@ -74,10 +83,10 @@ let state_to_args state =
         last_match_id
 (** [state_to_args state] constructs query string from search state [state] *)
 
-let get_fulltext_search_state () =
-  match !search_state with
-  | FulltextSearch state -> state
-  | _ -> raise @@ web_app_error "get_fulltext_search_state : current state can't be retrieved (may not be a fulltext_search_state)"
+(* let get_fulltext_search_state () =
+   match !search_state with
+   | FulltextSearch state -> state
+   | _ -> raise @@ web_app_error "get_fulltext_search_state : current state can't be retrieved (may not be a fulltext_search_state)" *)
 (** Get fulltext_search state from search state. Raises [Web_app_error] if current state isn't an entry state. *)
 
 let fulltext_search_state_to_sources_search_info {pattern; files; is_regex; is_case_sensitive; last_match_id} =
@@ -91,10 +100,10 @@ let fulltext_search_state_to_sources_search_info {pattern; files; is_regex; is_c
   }
 (** Converts [fulltext_search_state] to [Data_types.sources_search_info] *)
 
-let state_to_info state =
-  match state with
-  | Uninitialized -> raise @@ web_app_error "state_to_info: couldn't get info from uninitialized search for fulltext search"
-  | FulltextSearch state -> (fulltext_search_state_to_sources_search_info state)
+(* let state_to_info state =
+   match state with
+   | Uninitialized -> raise @@ web_app_error "state_to_info: couldn't get info from uninitialized search for fulltext search"
+   | FulltextSearch state -> (fulltext_search_state_to_sources_search_info state) *)
 (** Converts [search_state] to [Data_types.info].
     Raises [Web_app_error] if current state is uninitialised. *)
 
@@ -172,11 +181,11 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> unit =
            append_inner occ_line elt##.occline;
            Dom.appendChild line2_a_div_tab_tr_td2 occ_line;
 
-           append_inner line2_a_div_tab_tr (js "At line ");
+           append_inner line2_a_div_tab_tr (js "At line &nbsp");
            line2_a_div_tab_tr##.style##.marginLeft := js "2%";
 
            Dom.appendChild line2_a_div_tab_tr line2_a_div_tab_tr_td1;
-           append_inner line2_a_div_tab_tr (js " ");
+           append_inner line2_a_div_tab_tr (js "&nbsp &nbsp ");
            Dom.appendChild line2_a_div_tab_tr line2_a_div_tab_tr_td2;
 
 
@@ -204,13 +213,28 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> unit =
 (** ok *)
 
 let preview_fulltext_source pattern regex case_sens =
+  let handle_checkbox id state =
+    let target =
+      match id with
+      | "fcase_ftype_ml" -> ML
+      | "fcase_ftype_dune" -> DUNE
+      | "fcase_ftype_makefile" -> MAKEFILE
+      | _ -> raise @@ web_app_error "Error in preview_fulltext_source -> handle_checkbox"
+    in
+    if to_bool @@ (get_input id)##.checked
+    then state.files <- target
+  in
+  (* Init fulltext_info *)
   let fulltext_info = {
     pattern;
     files = ML;
     is_regex = regex;
     is_case_sensitive = case_sens;
-    last_match_id = 0;
+    last_match_id = !search_state.last_match_id;
   } in
+  handle_checkbox "fcase_ftype_ml" fulltext_info;
+  handle_checkbox "fcase_ftype_dune" fulltext_info;
+  handle_checkbox "fcase_ftype_makefile" fulltext_info;
   Lwt.async @@
   Requests.send_generic_request
     ~request:(Requests.getSources_fulltext @@ fulltext_search_state_to_sources_search_info @@ fulltext_info)
@@ -230,15 +254,82 @@ let preview_fulltext_source pattern regex case_sens =
 
 let set_handlers () =
   let fulltext_form = unopt @@ Html.CoerceTo.input @@ get_element_by_id "fpattern_fulltext" in
+  let ml_switch = get_input "fcase_ftype_ml" in
+  let dune_switch = get_input "fcase_ftype_dune" in
+  let mkfile_switch = get_input "fcase_ftype_makefile" in
+
+  ml_switch##.onchange := Html.handler ( fun _ ->
+      let cur_input_value = fulltext_form##.value##trim in
+      let is_regex = to_bool @@ (get_input "fregex")##.checked in
+      let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
+      if to_bool ml_switch##.checked
+      then
+        begin
+          dune_switch##.checked := _false;
+          mkfile_switch##.checked := _false;
+          preview_fulltext_source (to_string cur_input_value) is_regex case_sens
+        end
+      else
+        begin
+          (* Must select one type of files to perform fulltext search, ML by default *)
+          if ((not @@ to_bool dune_switch##.checked) && (not @@ to_bool mkfile_switch##.checked))
+          then ml_switch##.checked := _true
+        end;
+      _false
+    );
+  (** Only one switch at a time *)
+
+  dune_switch##.onchange := Html.handler ( fun _ ->
+      let cur_input_value = fulltext_form##.value##trim in
+      let is_regex = to_bool @@ (get_input "fregex")##.checked in
+      let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
+      if to_bool dune_switch##.checked
+      then
+        begin
+          ml_switch##.checked := _false;
+          mkfile_switch##.checked := _false;
+          preview_fulltext_source (to_string cur_input_value) is_regex case_sens
+        end
+      else
+        begin
+          (* Must select one type of files to perform fulltext search, ML by default *)
+          if ((not @@ to_bool ml_switch##.checked) && (not @@ to_bool mkfile_switch##.checked))
+          then ml_switch##.checked := _true
+        end;
+      _false
+    );
+  (** Only one switch at a time *)
+
+  mkfile_switch##.onchange := Html.handler ( fun _ ->
+      let cur_input_value = fulltext_form##.value##trim in
+      let is_regex = to_bool @@ (get_input "fregex")##.checked in
+      let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
+      if to_bool mkfile_switch##.checked
+      then
+        begin
+          ml_switch##.checked := _false;
+          dune_switch##.checked := _false;
+          preview_fulltext_source (to_string cur_input_value) is_regex case_sens
+        end
+      else
+        begin
+          (* Must select one type of files to perform fulltext search, ML by default *)
+          if ((not @@ to_bool dune_switch##.checked) && (not @@ to_bool ml_switch##.checked))
+          then ml_switch##.checked := _true
+        end;
+      _false
+    );
+  (** Only one switch at a time *)
 
   fulltext_form##.onkeyup := Html.handler (fun kbevent ->
       let cur_input_value = fulltext_form##.value##trim in
       let is_regex = to_bool @@ (get_input "fregex")##.checked in
       let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
+
       begin
         match Option.map to_string @@ Optdef.to_option @@ kbevent##.key with
         | Some "Space" -> 
-            logs "just pressed spacebar";
+            logs "user just pressed spacebar";
             preview_fulltext_source (to_string cur_input_value) is_regex case_sens;   
         | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens;
       end;
@@ -279,7 +370,11 @@ let set_handlers () =
         last := Js.date##now;
         if ((float_of_string (to_string updated_opacity)) > 0.)
         then window##requestAnimationFrame(Js.wrap_callback (fun _ -> tick ())) |> ignore
-        else regex_inst##.style##.display := js "none"
+        else
+          begin
+            regex_inst##.style##.display := js "none";
+            Headfoot.footerHandler();
+          end
       in
 
       tick ();
@@ -289,10 +384,10 @@ let set_handlers () =
     for [time] ms and sets div [regex_instructions]'s display style option to none when opacity gets to 0) *)
 
 
-let initialise_state () =
-  let args = Url.Current.arguments in
-  if args != []
-  then search_state := state_of_args args
+(* let initialise_state () =
+   let args = Url.Current.arguments in
+   if args != []
+   then search_state := state_of_args args *)
 (** Initialises state by looking up current URL arguments (query string) *)
 
 let uninitialized_page () =
@@ -303,7 +398,7 @@ let uninitialized_page () =
 
 let onload () =
   set_handlers ();
-  initialise_state ();
+  (* initialise_state (); *)
   uninitialized_page ()
 (* match !search_state with
    | Uninitialized -> uninitialized_page ()
