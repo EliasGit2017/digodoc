@@ -114,6 +114,26 @@ module SAVE = struct
       ) (Cmt.getVals @@ Option.get mdl.mdl_cmi_info);
     close_out oc
 
+  let save_module_types file mdl =
+    match mdl.mdl_cmi_info with
+    | None -> ()
+    | Some mdl_cmi_info ->
+        match Cmt.getTypes mdl_cmi_info with
+        | [] -> ()
+        | type_sig_list ->
+            let oc = open_out file in
+            let ofmt = Format.formatter_of_out_channel oc in
+            Format.fprintf ofmt "%s@.%s@.%s@.%a"
+            mdl.mdl_name
+            mdl.mdl_opam.opam_name
+            (String.trim mdl.mdl_opam.opam_version)
+            (Format.pp_print_list
+              ~pp_sep:(fun fmt () -> Format.fprintf fmt "@.")
+              (fun fmt (ident,type_kind,type_decl) ->
+                Format.fprintf fmt "%s@.%s@.%s@." ident type_kind type_decl
+              )) type_sig_list ;
+              close_out oc
+
 end
 
 open TYPES
@@ -143,7 +163,7 @@ let pkg_of_meta meta =
   Printf.sprintf "META.%s@%s.%s"
     meta.meta_name meta.meta_opam_name meta.meta_opam_version
 
-let pkg_of_src src = 
+let pkg_of_src src =
   Printf.sprintf "%s.%s"
     src.src_opam_name src.src_opam_version
 
@@ -248,7 +268,7 @@ let print_index bb index entity_name =
       if !Globals.frontend = Globals.JS then begin
         List.iter (fun ( _entry, line ) ->
             Printf.bprintf bb "%s\n" line;
-          ) ( List.sort compare !r ) 
+          ) ( List.sort compare !r )
       end;
       Printf.bprintf bb {|
       </ol>
@@ -455,22 +475,22 @@ let read_all_entries () =
   let entries = ref [] in
   let dir = Globals.digodoc_html_dir in
   Array.iter (fun pkg ->
-      let dir = dir // pkg in
-      Array.iter (fun file ->
+    let dir = dir // pkg in
+    Array.iter (fun file ->
 
-          if EzString.starts_with file ~prefix:"ENTRY." then
-            let entry = read_entry ( dir // file ) in
-            begin  
-              match entry with
-              | Opam {opam_name; opam_version; _ } ->
-                  let src = Source {src_opam_name=opam_name;src_opam_version=opam_version} in
-                  entries := src :: !entries
-              | _ -> ()
-            end;
-            entries := entry :: !entries
+      if EzString.starts_with file ~prefix:"ENTRY." then
+        let entry = read_entry ( dir // file ) in
+        begin
+          match entry with
+          | Opam {opam_name; opam_version; _ } ->
+            let src = Source {src_opam_name=opam_name;src_opam_version=opam_version} in
+            entries := src :: !entries
+          | _ -> ()
+        end;
+        entries := entry :: !entries
 
-        ) ( try Sys.readdir dir with _ -> [||] )
-    ) ( Sys.readdir dir ) ;
+    ) ( try Sys.readdir dir with _ -> [||] )
+  ) ( Sys.readdir dir ) ;
 
   Printf.eprintf "%d entries read\n%!" ( List.length !entries ) ;
   !entries
@@ -480,17 +500,17 @@ let generate () =
   if !Globals.db_update_index then begin
     Printf.eprintf "Updating DB index...\n%!";
     let promis =
-      Lwt.bind 
+      Lwt.bind
         (Cohttp_lwt_unix.Client.get (Uri.of_string "http://localhost:49002/generate"))
-        (fun _ -> Lwt_io.eprintf "Done...\n%!") 
+        (fun _ -> Lwt_io.eprintf "Done...\n%!")
     in Lwt_main.run promis
   end;
   if !Globals.sources_update_index then begin
     Printf.eprintf "Indexating sources...\n%!";
     let promis =
-      Lwt.bind 
+      Lwt.bind
         (Cohttp_lwt_unix.Client.get (Uri.of_string "http://localhost:49002/sources"))
-        (fun _ -> Lwt_io.eprintf "Done...\n%!") 
+        (fun _ -> Lwt_io.eprintf "Done...\n%!")
     in Lwt_main.run promis
   end;
   let state = read_all_entries () in
@@ -518,7 +538,7 @@ let generate () =
 <div class="contained-right">
 <input id="localsearch" placeholder="Search in ..." autocomplete="off">
 </div>
-</div>  
+</div>
 <br>
 <br>
 |} title stdlib_version;
