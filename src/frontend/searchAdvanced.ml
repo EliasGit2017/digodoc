@@ -349,13 +349,8 @@ let update_element_state () =
   (* Handle checkboxes *)
   handle_checkbox "fvals" element_state;
   element_state.regex <- to_bool (get_input "fregex")##.checked;
-<<<<<<< HEAD
   element_state.in_opams <- getTags "pack_tag_container";
   element_state.in_mdls <- getTags "mod_tag_container";
-=======
-  element_state.in_opams <- getPackTags () ;
-  element_state.in_mdls <- getMdlTags () ;
->>>>>>> 0eabba31717548a068203a771c4188b9c45c45b4
 
   match element_state.elements with
   | set when ElementSet.is_empty set -> false
@@ -415,184 +410,6 @@ let update_form () =
       end
 (** Looks for state in order to update corresponding form *)
 
-<<<<<<< HEAD
-=======
-let insert_packsUl_li : packages_jsoo t -> unit  = 
-  fun (packages : packages_jsoo t) ->
-  let packsUl = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "packsUl" in
-  let input = unopt @@ Html.CoerceTo.input @@ get_element_by_id "ftextpackages" in
-  let tag_container = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "pack_tag_container" in
-  (* Start by removing all children from packsUl and replace them with result of new request 
-     packsUl##.innerHTML = "";*)
-  packsUl##.innerHTML := js "";
-  let cur_tags = ref StringSet.empty in
-  if to_bool tag_container##hasChildNodes
-  then
-    begin
-      let chosen_tags = tag_container##.childNodes in
-      for i = 0 to chosen_tags##.length - 1
-      do
-        let tag_li = unopt @@ Html.CoerceTo.element @@ unopt @@ (chosen_tags##item i) in
-        cur_tags := StringSet.add (to_string (tag_li##.innerText)) !cur_tags;
-      done
-    end;
-  foreach
-    (fun i elt ->
-       if i < 10
-       then begin
-         let pack_li = Html.createLi document in
-         let name = to_string elt##.name in 
-         pack_li##.onclick := Html.handler (fun _ ->
-             if (StringSet.mem name!cur_tags)
-             then Html.window##alert (js ("Error : package " ^ name ^ " already chosen,\nCheck for a different version"))
-             else 
-               begin
-                 cur_tags := StringSet.add name !cur_tags;
-                 let sp1 = Html.createSpan document in
-                 let sp2 = Html.createSpan document in
-                 sp1##.classList##add (js "tag"); 
-                 sp1##.innerText := js name;
-                 sp2##.classList##add (js "remove");
-                 sp2##.onclick := Html.handler (fun _ ->
-                     cur_tags := StringSet.remove name !cur_tags;
-                     Dom.removeChild (unopt @@ sp1##.parentNode) sp1;
-                     _false
-                   );
-                 let tag_container_li = Html.createLi document in
-                 Dom.appendChild sp1 sp2;
-                 Dom.appendChild tag_container_li sp1;
-                 Dom.appendChild tag_container tag_container_li;
-               end;
-             input##.value := js "";
-             packsUl##.style##.display := js "none";
-             Headfoot.footerHandler();
-             _false
-           );
-         let a_li = Html.createA document in
-         Insertion.set_attr a_li "href" (js ("#"));
-         Insertion.set_attr a_li "style" (js "color:green");
-         a_li##.innerText := js name;
-         pack_li##.style##.display := js "block";
-         Dom.appendChild pack_li a_li;
-         Dom.appendChild packsUl pack_li;
-         Headfoot.footerHandler();
-       end;
-    )
-    packages
-(** preview packages propositions from which to choose *)
-
-let insert_modsUl_li : modules_jsoo t -> unit  = 
-  fun (modules : modules_jsoo t) ->
-  let modsUl = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "modsUl" in
-  let input = unopt @@ Html.CoerceTo.input @@ get_element_by_id "ftextmodules" in
-  let tag_container = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "mod_tag_container" in
-  (* Start by removing all children from packsUl and replace them with result of new request*) 
-  modsUl##.innerHTML := js "";
-  let cur_tags = ref StringSet.empty in
-  if to_bool tag_container##hasChildNodes
-  then
-    begin
-      let chosen_tags = tag_container##.childNodes in
-      for i = 0 to chosen_tags##.length - 1
-      do
-        let tag_li = unopt @@ Html.CoerceTo.element @@ unopt @@ (chosen_tags##item i) in
-        cur_tags := StringSet.add (to_string (tag_li##.innerText)) !cur_tags;
-      done
-    end;
-  (* logs "printing selected tags  ----> ";
-     StringSet.iter (fun e -> logs e) !cur_tags; *)
-  foreach
-    (fun i elt ->
-       if i < 10
-       then begin
-         let pack_li = Html.createLi document in
-         let pack_name = match String.index_opt (to_string elt##.opam) '.' with
-         | Some i -> String.sub (to_string elt##.opam) 0 i
-         | None -> to_string elt##.opam in
-         let name = to_string (concat elt##.name (js @@ ":" ^ pack_name)) in
-         pack_li##.onclick := Html.handler (fun _ ->
-             if (StringSet.mem name !cur_tags)
-             then Html.window##alert (js ("Error : package " ^ name ^ " already chosen,\nCheck for a different version"))
-             else 
-               begin
-                 cur_tags := StringSet.add name !cur_tags;
-                 let sp1 = Html.createSpan document in
-                 let sp2 = Html.createSpan document in
-                 sp1##.classList##add (js "tag"); 
-                 sp1##.innerText := js name;
-                 sp2##.classList##add (js "remove");
-                 sp2##.onclick := Html.handler (fun _ ->
-                     cur_tags := StringSet.remove name !cur_tags;
-                     Dom.removeChild (unopt @@ sp1##.parentNode) sp1;
-                     _false
-                   );
-                 let tag_container_li = Html.createLi document in
-                 Dom.appendChild sp1 sp2;
-                 Dom.appendChild tag_container_li sp1;
-                 Dom.appendChild tag_container tag_container_li;
-               end;
-             input##.value := js "";
-             modsUl##.style##.display := js "none";
-             Headfoot.footerHandler();
-             _false
-           );
-         let a_li = Html.createA document in
-         Insertion.set_attr a_li "href" (js ("#"));
-         let in_w = Html.createSpan document in
-         Insertion.set_attr in_w "style" (js "color:black");
-         in_w##.innerHTML := js " in ";
-         let pkg = Html.createSpan document in 
-         Insertion.set_attr pkg "style" (js "color:green");
-         pkg##.innerHTML := js pack_name;
-         a_li##.innerHTML := elt##.name;
-         Dom.appendChild a_li in_w;
-         Dom.appendChild a_li pkg;
-         pack_li##.style##.display := js "block";
-         Dom.appendChild pack_li a_li;
-         Dom.appendChild modsUl pack_li;
-         Headfoot.footerHandler();
-       end;
-    )
-    modules
-(** preview modules propositions from which to choose *)
-
-(* let insert_Sources_fulltext : sources_search_result_jsoo t -> unit = 
-  fun (sources : sources_search_result_jsoo t) ->
-  sources *)
-(** Insert Sources results for fulltext search *)
-
-(* let preview_Sources pattern files =
-  let sources_search_info = {
-    pattern;
-    files;
-    is_regex = true;
-    is_case_sensitive = true;
-    last_match_id = 10; 
-  } in
-  Lwt.async @@
-  Requests.send_generic_request
-    ~request:(Requests.getSources_fulltext sources_search_info)
-    ~callback:(fun source_search_result ->
-        if not @@ (source_search_result.occs = [])
-        then
-          begin
-            insert_Sources_fulltext (Objects.sources_search_result_to_jsoo source_search_result);
-          end;  
-        Lwt.return_unit
-      )
-    ~error:(fun err ->
-        begin
-          match err with
-          | Unknown ->
-              logs "Something went wrong in preview_Sources"
-          | _ ->
-              warn "Work on preview_Sources";
-        end;
-        Lwt.return_unit
-      ) *)
-(** Request to get sources for fulltext search (improve comments as ASAP) *)
-
->>>>>>> 0eabba31717548a068203a771c4188b9c45c45b4
 let previewpacks pattern =
   let entry_info = {
     entry = PACK;
@@ -728,7 +545,6 @@ let set_handlers () =
     );
   (* Show / Hide package and module checkbox in element-form when slider is checked / unchecked *)
   toggle_entry_form##.onclick := Html.handler (fun _ ->
-<<<<<<< HEAD
       let hide_this = get_element_by_id "element-search-content" in
       let hide_this2 = get_element_by_id "fulltext-search-content" in
       let show_this = get_element_by_id "entry-search-content" in
@@ -762,17 +578,6 @@ let set_handlers () =
   (**Show fulltext-search-form's div when button having id="col_fulltext" is clicked and hide other form's div *)
 
 
-=======
-      toogle_form "entry-search-content";
-      _false
-    );
-  (* Show entry-form's div when button having id="col_entry" is clicked and hide element-form's div *)
-  toggle_element_form##.onclick := Html.handler (fun _ ->
-      toogle_form "element-search-content";
-      _false
-    );
-  (* Show element-form's div when button having id="col_funcs" is clicked and hide entry-form's div *)
->>>>>>> 0eabba31717548a068203a771c4188b9c45c45b4
   pack_tag_handling##.onkeyup := Html.handler (fun kbevent ->
       let cur_input_value = pack_tag_handling##.value##trim in
       let packsUl = get_element_by_id "packsUl" in
