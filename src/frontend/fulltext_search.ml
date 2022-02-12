@@ -61,7 +61,7 @@ let append_inner elt str =
 (** [append_inner elt str] appends [str] to the content of [elt]. *)
 
 let insert_Fulltext_Sources : sources_search_result_jsoo t -> bool -> unit =
-  fun (result : sources_search_result_jsoo t) b ->
+  fun (result : sources_search_result_jsoo t) add_more ->
   let load_more_btn = unopt @@ Html.CoerceTo.button @@ get_element_by_id "load_more" in
   let current_pattern = unopt @@ Html.CoerceTo.input @@ get_element_by_id "fpattern_fulltext" in
   let result_div = unopt @@ Html.CoerceTo.div @@ get_element_by_id "result-div" in
@@ -69,7 +69,7 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> bool -> unit =
   let page_info = unopt @@ Html.CoerceTo.div @@ get_element_by_id "page-info" in
   let occurences_text = Html.createP document in
 
-  if not b
+  if not add_more
   then
     begin
       page_info##.innerHTML := js "";
