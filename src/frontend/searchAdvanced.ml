@@ -40,7 +40,10 @@ end
 
 module OrderedElement = struct
   type t = Data_types.element_type
-  let compare VAL VAL = 0
+  let compare e1 e2 =
+    match e1,e2 with
+    | x,y when x=y -> 0
+    | _ -> 0
 end
 (** Ordered entry (element?) type *)
 
@@ -54,12 +57,12 @@ module StringSet = Set.Make(String)
 (** Set of strings. *)
 
 module StringCoupleSet = Set.Make(struct 
-  type t = string * string
-  let compare (x1,x2) (y1,y2) = 
-    match String.compare x1 y1 with
-    | 0 -> String.compare x2 y2
-    | x -> x 
-end)
+    type t = string * string
+    let compare (x1,x2) (y1,y2) = 
+      match String.compare x1 y1 with
+      | 0 -> String.compare x2 y2
+      | x -> x 
+  end)
 (** Set of strings. *)
 
 type entry_search_state = {
@@ -146,12 +149,12 @@ let state_of_args args =
           | "page" -> state.page <- int_of_string elt
           | "opam" -> state.in_opams <- StringSet.add (decode_query_val elt) state.in_opams
           | "mdl" ->
-            let elt = decode_query_val elt in
-            begin
-              match String.split_on_char '+' elt with
-              | [mdl;opam] -> state.in_mdls <- StringCoupleSet.add (mdl,opam) state.in_mdls
-              | _ -> raise @@ web_app_error (Printf.sprintf "state_of_args: mdl  value %s has wrong format" elt)
-            end
+              let elt = decode_query_val elt in
+              begin
+                match String.split_on_char '+' elt with
+                | [mdl;opam] -> state.in_mdls <- StringCoupleSet.add (mdl,opam) state.in_mdls
+                | _ -> raise @@ web_app_error (Printf.sprintf "state_of_args: mdl  value %s has wrong format" elt)
+              end
           | _ -> raise @@ web_app_error (Printf.sprintf "state_of_args: key %s is not recognised" key)
         )
         args;
@@ -349,8 +352,8 @@ let update_element_state () =
   (* Handle checkboxes *)
   handle_checkbox "fvals" element_state;
   element_state.regex <- to_bool (get_input "fregex")##.checked;
-  element_state.in_opams <- getTags "pack_tag_container";
-  element_state.in_mdls <- getTags "mod_tag_container";
+  element_state.in_opams <- getPackTags ();
+  element_state.in_mdls <- getMdlTags() ;
 
   match element_state.elements with
   | set when ElementSet.is_empty set -> false
@@ -374,9 +377,9 @@ let update_form () =
     sp1##.innerText := js name;
     sp2##.classList##add (js "remove");
     sp2##.onclick := Html.handler (fun _ ->
-      Dom.removeChild (unopt @@ sp1##.parentNode) sp1;
-      _false
-    );
+        Dom.removeChild (unopt @@ sp1##.parentNode) sp1;
+        _false
+      );
     let tag_container_li = Html.createLi document in
     Dom.appendChild sp1 sp2;
     Dom.appendChild tag_container_li sp1;
