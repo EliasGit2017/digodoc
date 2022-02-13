@@ -33,7 +33,7 @@ let state = {
   is_case_sensitive = true;
   last_match_id = 0
 }
-(** Default search_state update through deref *)
+(** Default search_state updated through deref *)
 
 let search_state = ref state
 (** Global variable that stores state of fulltext search page *)
@@ -84,7 +84,6 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> bool -> unit =
   if not @@ ((to_string current_pattern##.value##trim) = "")
   then
     begin
-
       foreach
         (fun _ elt ->
            let source_occ_ul = Html.createUl document in
