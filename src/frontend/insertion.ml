@@ -584,6 +584,7 @@ let insert_entries_search entries =
 let insert_elements_search elements =
     match elements with
     | Val vals -> insert_vals_search (Objects.vals_to_jsoo vals)
+    | _ -> ()
 (** Calls specific to [elements] insertion function for search page *)
 
 (** ----------------------------------------------------------------------------------------------- *)
