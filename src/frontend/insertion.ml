@@ -561,7 +561,7 @@ let insert_classes_search : classes_jsoo t -> unit =
        (* Append keyword 'class' *)
        let classl_word = Html.createSpan document in
        set_attr classl_word "class" (js "keyword");
-       append_inner classl_word (js "class");
+       append_inner classl_word (js "class ");
        Dom.appendChild classl classl_word;
        (* Append class name *)
        let classl_ident = Html.createA document in
@@ -663,7 +663,6 @@ let insert_elements_search elements =
   | Val vals -> insert_vals_search (Objects.vals_to_jsoo vals)
   | Type types -> insert_types_search (Objects.types_to_jsoo types)
   | Class classes -> insert_classes_search (Objects.classes_to_jsoo classes)
-(* | Class rclass -> insert_class_search (Objects.class_to_jsoo rclass) *)
 (** Calls specific to [elements] insertion function for search page *)
 
 (** ----------------------------------------------------------------------------------------------- *)
@@ -701,7 +700,7 @@ let insert_modsUl_li : modules_jsoo t -> unit  =
          let name_version = to_string (concat (concat elt##.name (js " ")) elt##.opam) in
          pack_li##.onclick := Html.handler (fun _ ->
              if (StringSet.mem name_version !cur_tags)
-             then Html.window##alert (js ("Error : package " ^ name_version ^ " already chosen,\nCheck for a different version"))
+             then Html.window##alert (js ("Error : module " ^ name_version ^ " already chosen,\nCheck for a different version / Module"))
              else 
                begin
                  cur_tags := StringSet.add name_version !cur_tags;
@@ -765,7 +764,7 @@ let insert_packsUl_li : packages_jsoo t -> unit  =
          let name_version = to_string (concat (concat elt##.name (js " ")) elt##.version) in
          pack_li##.onclick := Html.handler (fun _ ->
              if (StringSet.mem name_version !cur_tags)
-             then Html.window##alert (js ("Error : package " ^ name_version ^ " already chosen,\nCheck for a different version"))
+             then Html.window##alert (js ("Error : package " ^ name_version ^ " already chosen,\nCheck for a different version / Package"))
              else 
                begin
                  cur_tags := StringSet.add name_version !cur_tags;

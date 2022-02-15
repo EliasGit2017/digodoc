@@ -15,6 +15,14 @@ open Js
 open Globals
 open Data_types
 
+(** Module [Fulltext_Search] defines behaviour for fulltext search page (fulltext_search.html)
+    Fulltext search page is constructed dynamically by sending requests to the API server each
+    time a new character is inserted in Search Pattern input (#fpattern_fulltext) or the targeted file
+    (ML files, DUNE files or MAKEFILE files) type is changed using the given checkboxes.
+    If the user decides to perform the search using pattern instead of RegEx (by default) or 
+    if he disables the case sensitive option, he will need to rewrite his pattern in the #fpattern_fulltext
+    input. *)
+
 
 type fulltext_search_state = {
   mutable pattern : string;
@@ -97,7 +105,7 @@ let preview_fulltext_source pattern regex case_sens loadmore =
         end;
         Lwt.return_unit
       )
-(** Request to get sources fulltext result *)
+(** Request to get [Data_types.sources_search_result] *)
 
 let set_handlers () =
   let fulltext_form = unopt @@ Html.CoerceTo.input @@ get_element_by_id "fpattern_fulltext" in
@@ -120,7 +128,6 @@ let set_handlers () =
         end
       else
         begin
-          (* Must select one type of files to perform fulltext search, ML by default *)
           if ((not @@ to_bool dune_switch##.checked) && (not @@ to_bool mkfile_switch##.checked))
           then
             begin
@@ -130,7 +137,8 @@ let set_handlers () =
         end;
       _false
     );
-  (** Only one switch at a time *)
+  (** Handler for the .ml checkbox . The user must select one type of files to perform fulltext search, ML by default.
+      If changed, then a new request is sent to the API to retrieve the corresponding results. *)
 
   dune_switch##.onchange := Html.handler ( fun _ ->
       let cur_input_value = fulltext_form##.value##trim in
@@ -146,7 +154,6 @@ let set_handlers () =
         end
       else
         begin
-          (* Must select one type of files to perform fulltext search, ML by default *)
           if ((not @@ to_bool ml_switch##.checked) && (not @@ to_bool mkfile_switch##.checked))
           then
             begin
@@ -156,7 +163,8 @@ let set_handlers () =
         end;
       _false
     );
-  (** Only one switch at a time *)
+  (** Handler for the dune checkbox . The user must select one type of files to perform fulltext search, ML by default.
+      If changed, then a new request is sent to the API to retrieve the corresponding results. *)
 
   mkfile_switch##.onchange := Html.handler ( fun _ ->
       let cur_input_value = fulltext_form##.value##trim in
@@ -172,7 +180,6 @@ let set_handlers () =
         end
       else
         begin
-          (* Must select one type of files to perform fulltext search, ML by default *)
           if ((not @@ to_bool dune_switch##.checked) && (not @@ to_bool ml_switch##.checked))
           then
             begin
@@ -182,18 +189,20 @@ let set_handlers () =
         end;
       _false
     );
-  (** Only one switch at a time *)
+  (** Handler for the makefile checkbox . The user must select one type of files to perform fulltext search, ML by default.
+      If changed, then a new request is sent to the API to retrieve the corresponding results. *)
 
   fulltext_form##.onkeyup := Html.handler (fun kbevent ->
       let cur_input_value = fulltext_form##.value##trim in
       let is_regex = to_bool @@ (get_input "fregex")##.checked in
       let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
+      let regex_inst = unopt @@ Html.CoerceTo.div @@ get_element_by_id "regex_instructions" in
       state.last_match_id <- 0;
       begin
         match Option.map to_string @@ Optdef.to_option @@ kbevent##.key with
-        | Some "Space" -> 
-            logs "user just pressed spacebar";
-            preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;   
+        | Some "Escape" ->
+            regex_inst##.style##.display := js "none";
+
         | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
       end;
       load_more_btn##.style##.display := js "block";

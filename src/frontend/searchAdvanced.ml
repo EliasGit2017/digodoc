@@ -102,7 +102,7 @@ let get_first_entry = EntrySet.min_elt
     - sources *)
 
 let get_first_element = ElementSet.min_elt
-(** Gets element from a set following order from below:
+(** Gets element from a set following order from below:  ---> check with what is done in compare
     - vals
     - types
     - classes *)
