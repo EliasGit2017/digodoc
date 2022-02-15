@@ -887,7 +887,7 @@ let search_page () =
   in
   (* insert page content *)
   insert_content info current !current_number
-(** Constructs and displays entirely search page. *)
+(** Constructs and displays entirely search page.  ----> Maybe add a footerhandler here ? seems needed *)
 
 let onload () =
   (* set handlers to page elements *)

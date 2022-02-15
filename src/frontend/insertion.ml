@@ -901,6 +901,5 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> bool -> unit =
       load_more_btn##.style##.display := js "none"
     end;
   Headfoot.footerHandler ();
-  logs @@ string_of_int @@ result##.totaloccs
 (** Inserts the result of fulltext search given by ez_search and displays the load more button if [load_more] is
     set to true *)
