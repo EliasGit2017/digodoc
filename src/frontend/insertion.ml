@@ -516,37 +516,37 @@ let insert_types_search : types_jsoo t -> unit =
   fun (types : types_jsoo t) ->
   foreach
     (fun _ elt ->
-        (* Create a line *)
-        let typel = Html.createLi document in
-        set_attr typel "class" (js "package");
-        (* Append keyword 'type' *)
-        let typel_word = Html.createSpan document in
-        set_attr typel_word "class" (js "keyword");
-        append_inner typel_word (js "type ");
-        Dom.appendChild typel typel_word;
-        (* Append type name *)
-        let typel_ident = Html.createA document in
-        let typel_href = concat (js "#type-") elt##.ident in
-        set_attr typel_ident "href" @@ concat elt##.mdlpath typel_href;
-        set_attr typel_ident "class" (js "val");
-        append_inner typel_ident elt##.ident;
-        Dom.appendChild typel typel_ident;
-        append_inner typel (js " : ");
-        (* Append type package *)
-        append_inner typel (js " in opam ");
-        let typel_opam = Html.createA document in
-        set_attr typel_opam "class" (js "digodoc-opam");
-        set_attr typel_opam "href" elt##.opampath;
-        append_inner typel_opam elt##.opam;
-        Dom.appendChild typel typel_opam;
-        (* Append type module *)
-        append_inner typel (js " in ");
-        let typel_mdl = Html.createA document in
-        set_attr typel_mdl "href" elt##.mdlpath;
-        append_inner typel_mdl elt##.mdl;
-        Dom.appendChild typel typel_mdl;
-        let result_ul = get_element_by_id "results-list" in
-        Dom.appendChild result_ul typel;
+       (* Create a line *)
+       let typel = Html.createLi document in
+       set_attr typel "class" (js "package");
+       (* Append keyword 'type' *)
+       let typel_word = Html.createSpan document in
+       set_attr typel_word "class" (js "keyword");
+       append_inner typel_word (js "type ");
+       Dom.appendChild typel typel_word;
+       (* Append type name *)
+       let typel_ident = Html.createA document in
+       let typel_href = concat (js "#type-") elt##.ident in
+       set_attr typel_ident "href" @@ concat elt##.mdlpath typel_href;
+       set_attr typel_ident "class" (js "val");
+       append_inner typel_ident elt##.ident;
+       Dom.appendChild typel typel_ident;
+       append_inner typel (js " : ");
+       (* Append type package *)
+       append_inner typel (js " in opam ");
+       let typel_opam = Html.createA document in
+       set_attr typel_opam "class" (js "digodoc-opam");
+       set_attr typel_opam "href" elt##.opampath;
+       append_inner typel_opam elt##.opam;
+       Dom.appendChild typel typel_opam;
+       (* Append type module *)
+       append_inner typel (js " in ");
+       let typel_mdl = Html.createA document in
+       set_attr typel_mdl "href" elt##.mdlpath;
+       append_inner typel_mdl elt##.mdl;
+       Dom.appendChild typel typel_mdl;
+       let result_ul = get_element_by_id "results-list" in
+       Dom.appendChild result_ul typel;
     )
     types
 (** Same as [insert_vals_search] but deals with Ocaml types. *)
@@ -555,36 +555,36 @@ let insert_classes_search : classes_jsoo t -> unit =
   fun (classes : classes_jsoo t) ->
   foreach
     (fun _ elt ->
-      (* Create a line *)
-      let classl = Html.createLi document in
-      set_attr classl "class" (js "package");
-      (* Append keyword 'class' *)
-      let classl_word = Html.createSpan document in
-      set_attr classl_word "class" (js "keyword");
-      append_inner classl_word (js "class");
-      Dom.appendChild classl classl_word;
-      (* Append class name *)
-      let classl_ident = Html.createA document in
-      let classl_href = concat (js "#class-") elt##.ident in
-      set_attr classl_ident "href" @@ concat elt##.mdlpath classl_href;
-      set_attr classl_ident "class" (js "val");
-      append_inner classl_ident elt##.ident;
-      append_inner classl (js " : ");
-      (* Append class package *)
-      append_inner classl (js " in opam ");
-      let classl_opam = Html.createA document in
-      set_attr classl_opam "class" (js "digodoc-opam");
-      set_attr classl_opam "href" elt##.opampath;
-      append_inner classl_opam elt##.opam;
-      Dom.appendChild classl classl_opam;
-      (* Append class module *)
-      append_inner classl (js " in ");
-      let classl_mdl = Html.createA document in
-      set_attr classl_mdl "href" elt##.mdlpath;
-      append_inner classl_mdl elt##.mdl;
-      Dom.appendChild classl classl_mdl;
-      let result_ul = get_element_by_id "results-list" in
-      Dom.appendChild result_ul classl;
+       (* Create a line *)
+       let classl = Html.createLi document in
+       set_attr classl "class" (js "package");
+       (* Append keyword 'class' *)
+       let classl_word = Html.createSpan document in
+       set_attr classl_word "class" (js "keyword");
+       append_inner classl_word (js "class");
+       Dom.appendChild classl classl_word;
+       (* Append class name *)
+       let classl_ident = Html.createA document in
+       let classl_href = concat (js "#class-") elt##.ident in
+       set_attr classl_ident "href" @@ concat elt##.mdlpath classl_href;
+       set_attr classl_ident "class" (js "val");
+       append_inner classl_ident elt##.ident;
+       append_inner classl (js " : ");
+       (* Append class package *)
+       append_inner classl (js " in opam ");
+       let classl_opam = Html.createA document in
+       set_attr classl_opam "class" (js "digodoc-opam");
+       set_attr classl_opam "href" elt##.opampath;
+       append_inner classl_opam elt##.opam;
+       Dom.appendChild classl classl_opam;
+       (* Append class module *)
+       append_inner classl (js " in ");
+       let classl_mdl = Html.createA document in
+       set_attr classl_mdl "href" elt##.mdlpath;
+       append_inner classl_mdl elt##.mdl;
+       Dom.appendChild classl classl_mdl;
+       let result_ul = get_element_by_id "results-list" in
+       Dom.appendChild result_ul classl;
     )
     classes
 (** Same as [insert_types_search] but deals with Ocaml classes. *)
@@ -663,7 +663,7 @@ let insert_elements_search elements =
   | Val vals -> insert_vals_search (Objects.vals_to_jsoo vals)
   | Type types -> insert_types_search (Objects.types_to_jsoo types)
   | Class classes -> insert_classes_search (Objects.classes_to_jsoo classes)
-  (* | Class rclass -> insert_class_search (Objects.class_to_jsoo rclass) *)
+(* | Class rclass -> insert_class_search (Objects.class_to_jsoo rclass) *)
 (** Calls specific to [elements] insertion function for search page *)
 
 (** ----------------------------------------------------------------------------------------------- *)
