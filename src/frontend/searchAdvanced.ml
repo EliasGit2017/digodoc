@@ -43,9 +43,9 @@ module OrderedElement = struct
   let compare e1 e2 =
     match e1,e2 with
     | x,y when x=y -> 0
-    | _ -> 0
+    | _ -> 1
 end
-(** Ordered entry (element?) type *)
+(** Ordered element type  ---> will have to define a better compare *)
 
 module EntrySet = Set.Make(OrderedEntry)
 (** Set of entries. *)
@@ -103,7 +103,9 @@ let get_first_entry = EntrySet.min_elt
 
 let get_first_element = ElementSet.min_elt
 (** Gets element from a set following order from below:
-    - vals *)
+    - vals
+    - types
+    - classes *)
 
 let state_of_args args =
   (* Match type of search *)
@@ -327,8 +329,8 @@ let update_element_state () =
     let element =
       match id with
       | "fvals" -> VAL
-      (* | "fclasses" -> ... (search by classes) *)
-      (* | "ftypes" -> ... (search by types) *)
+      | "fclasses" -> CLASS
+      | "ftypes" -> TYPE
       | _ -> raise @@
           web_app_error (Printf.sprintf "update_element_state: can't find %s id" id)
     in
@@ -351,14 +353,16 @@ let update_element_state () =
   element_state.pattern <- value;
   (* Handle checkboxes *)
   handle_checkbox "fvals" element_state;
+  handle_checkbox "fclasses" element_state;
+  handle_checkbox "ftypes" element_state;
   element_state.regex <- to_bool (get_input "fregex")##.checked;
   element_state.in_opams <- getPackTags ();
-  element_state.in_mdls <- getMdlTags() ;
+  element_state.in_mdls <- getMdlTags () ;
 
   match element_state.elements with
   | set when ElementSet.is_empty set -> false
   | set ->
-      (* Set current entry to the least entry checked *)
+      (* Set current element to the last element checked *)
       element_state.current_element <- get_first_element set;
       search_state := SearchElement element_state;
       true

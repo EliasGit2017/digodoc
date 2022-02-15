@@ -84,6 +84,30 @@ type nonrec val_element = Data_types.val_element = {
 type nonrec vals = val_element list [@@deriving jsoo]
 (** Conversion from [Data_types.vals] to js object *)
 
+type nonrec type_element = Data_types.type_element = {
+  ident : string;
+  mdl : string;
+  mdlpath : string;
+  opam : string;
+  opampath : string;
+} [@@deriving jsoo]
+(** Conversion from [Data_types.type_element] to js object *)
+
+type nonrec types = type_element list [@@deriving jsoo]
+(** Conversion from [Data_types.types] to js object *)
+
+type nonrec class_element = Data_types.class_element = {
+  ident : string;
+  mdl : string;
+  mdlpath : string;
+  opam : string;
+  opampath : string;
+} [@@deriving jsoo]
+(** Conversion from [Data_types.class_element] to js object *)
+
+type nonrec classes = class_element list [@@deriving jsoo]
+(** Conversion from [Data_types.classes] to js object *)
+
 type nonrec search_result = Data_types.search_result = {
   packages : packages;
   libraries : libraries;
