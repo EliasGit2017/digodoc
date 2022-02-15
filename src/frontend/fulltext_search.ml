@@ -269,10 +269,8 @@ let set_handlers () =
 (** Loads at most the 20 next results if available *)
 
 let uninitialized_page () =
-  let forms = get_element_by_id "forms" in
-  forms##.style##.display := js "";
   Lwt.return_unit
-(** Displays unitialized version of the page. *)
+(** Displays unitialized version of the page, empty for the moment *)
 
 let onload () =
   set_handlers ();
