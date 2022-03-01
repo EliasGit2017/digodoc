@@ -176,25 +176,42 @@ body {
   width    : 100%
 }
 
-.toc {
-  position:
-    /*absolute*/
+/*
+position:
+    absolute
     fixed;
   top: calc(0.5 * var(--size-line))
-    /*0px*/
+    0px
   ;
   left       : -3%;
   text-align : left;
   width      : 15%;
   margin-left: 5%
-    /*-200px*/
+    -200px
   ;
   margin-top: calc(3 * var(--size-line))
-    /*0px*/
+    0px
   ;
   margin-right: var(--size-line);
-  /*border-top: solid thin var(--color-rule);*/
+  border-top: solid thin var(--color-rule);
   border-right: solid thin var(--color-rule);
+  max-height  : fit-content;
+  */
+
+.toc {
+  position      : fixed;
+  top           : calc(8 * var(--size-line));
+  left          : -3%;
+  text-align    : left;
+  width         : 15%;
+  margin-left   : 5%;
+  margin-top    : calc(1.5 * var(--size-line));
+  margin-right  : var(--size-line);
+  border-top    : none;
+  border-right  : solid thin var(--color-rule);
+  height        : 50%;
+  display       : flex;
+  flex-direction: column;
 }
 
 /* Horizontal rules. The way to do it is not so nice, e.g. for
@@ -382,10 +399,19 @@ a.digodoc-lib {
 }
 
 .toc ul {
+  /* font-family    : var(--font-headings);
+  text-transform : uppercase;
+  margin-top     : var(--size-line);
+  list-style-type: none; */
   font-family    : var(--font-headings);
   text-transform : uppercase;
   margin-top     : var(--size-line);
   list-style-type: none;
+  flex           : 1;
+  flex-grow      : 1;
+  flex-shrink    : 1;
+  flex-basis     : 0%;
+  overflow-y     : auto;
 }
 
 .toc ul ul {

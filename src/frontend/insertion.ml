@@ -876,7 +876,6 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> bool -> unit =
            append_inner line2_a_div_tab_tr (js "&nbsp &nbsp ");
            Dom.appendChild line2_a_div_tab_tr line2_a_div_tab_tr_td2;
 
-
            Dom.appendChild line2_a_div_tab_body line2_a_div_tab_tr;
            Dom.appendChild line2_a_div_tab line2_a_div_tab_body;
            Dom.appendChild line2_a_div line2_a_div_tab;
