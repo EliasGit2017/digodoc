@@ -565,7 +565,7 @@ let insert_classes_search : classes_jsoo t -> unit =
        Dom.appendChild classl classl_word;
        (* Append class name *)
        let classl_ident = Html.createA document in
-       let classl_href = concat (js "#class-") elt##.ident in
+       let classl_href = concat (js "#class-type-") elt##.ident in
        set_attr classl_ident "href" @@ concat elt##.mdlpath classl_href;
        set_attr classl_ident "class" (js "val");
        append_inner classl_ident elt##.ident;
@@ -701,7 +701,7 @@ let insert_modsUl_li : modules_jsoo t -> unit  =
          pack_li##.onclick := Html.handler (fun _ ->
              if (StringSet.mem name_version !cur_tags)
              then Html.window##alert (js ("Error : module " ^ name_version ^ " already chosen,\nCheck for a different version / Module"))
-             else 
+             else
                begin
                  cur_tags := StringSet.add name_version !cur_tags;
                  let sp1 = Html.createSpan document in
@@ -900,5 +900,5 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> bool -> unit =
       load_more_btn##.style##.display := js "none"
     end;
   Headfoot.footerHandler ();
-(** Inserts the result of fulltext search given by ez_search and displays the load more button if [load_more] is
-    set to true *)
+  (** Inserts the result of fulltext search given by ez_search and displays the load more button if [load_more] is
+      set to true *)

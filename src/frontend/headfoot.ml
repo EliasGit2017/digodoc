@@ -47,8 +47,8 @@ let footerHandler () =
   footer##.style##.position := js "relative";
   let innerHeight = unoptdef @@ window##.innerHeight
   and clientHeight = document##.body##.clientHeight in
-  (* logs ("innerHeight ------------> " ^ (string_of_int innerHeight));
-  logs ("clientHeigth -----------> " ^ (string_of_int clientHeight)); *)
+  logs ("innerHeight ------------> " ^ (string_of_int innerHeight));
+  logs ("clientHeigth -----------> " ^ (string_of_int clientHeight));
   (* If page height is bigger than window height *)
   if innerHeight <= clientHeight
   then footer##.style##.position := js "relative"

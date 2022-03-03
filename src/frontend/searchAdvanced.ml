@@ -43,6 +43,7 @@ module OrderedElement = struct
   let compare e1 e2 =
     match e1,e2 with
     | x,y when x=y -> 0
+    | VAL,_ | CLASS,VAL | TYPE,VAL | CLASS,TYPE -> -1 (* Not sure here ... *)
     | _ -> 1
 end
 (** Ordered element type  ---> will have to define a better compare *)

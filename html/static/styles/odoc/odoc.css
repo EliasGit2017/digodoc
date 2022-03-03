@@ -209,7 +209,7 @@ position:
   margin-right  : var(--size-line);
   border-top    : none;
   border-right  : solid thin var(--color-rule);
-  height        : 50%;
+  height        : 60%;
   display       : flex;
   flex-direction: column;
 }
@@ -427,7 +427,7 @@ a.digodoc-lib {
 .toc li {
   margin-left : 0;
   padding-left: 1ch;
-  text-indent : -1ch;
+  text-indent : 0ch;
 }
 
 .toc>ul>li {
@@ -589,7 +589,7 @@ pre code {
   font-size       : inherit;
   color           : white;
   background-color: #000000;
-  padding-left    : 10px;
+  /* padding-left    : 10px; */
 }
 
 /* don't apply transform twice... */
@@ -1895,7 +1895,7 @@ input[type="checkbox"]:checked~input {
 
 @media only screen and (max-width: 1700px) {
   .toc {
-    top: calc(10 * var(--size-line));
+    top: calc(5 * var(--size-line));
   }
 
   /*Put table of content at the level of letter selection*/
