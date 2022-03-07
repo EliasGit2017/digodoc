@@ -565,7 +565,7 @@ let insert_classes_search : classes_jsoo t -> unit =
        Dom.appendChild classl classl_word;
        (* Append class name *)
        let classl_ident = Html.createA document in
-       let classl_href = concat (js "#class-type-") elt##.ident in
+       let classl_href = concat (js "#class-") elt##.ident in
        set_attr classl_ident "href" @@ concat elt##.mdlpath classl_href;
        set_attr classl_ident "class" (js "val");
        append_inner classl_ident elt##.ident;
