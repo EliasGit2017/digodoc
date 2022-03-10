@@ -376,8 +376,10 @@ a.digodoc-lib {
 
 /* Linked highlight */
   {
-  background-color: var(--color-bg-highlight);
+  /* background-color: var(--color-bg-highlight); */
   border-radius   : 5px;
+  background: linear-gradient(0.25turn, #659CD6, 5%, #F6F6F6);
+  border: none;
 }
 
 .xref-unresolved {
