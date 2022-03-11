@@ -51,6 +51,15 @@ let write_message message =
   append_content msg_div
 (** Displays message at the bottom of the page. *)
 
+let write_message_id message id1 id2 =
+  let msg_div = unopt @@ Html.CoerceTo.div @@ get_element_by_id id1 in
+  let msg = unopt @@ Html.CoerceTo.element @@ get_element_by_id id2 in
+  msg##.innerText := js "";
+  msg##.innerText := js message;
+  msg_div##.style##.display := js "block";
+  Headfoot.footerHandler()
+(** Displays message at the bottom of the page. *)
+
 let write_warning warn =
   (* Create structure *)
   let warning_div = Html.createDiv document 
@@ -808,97 +817,100 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> bool -> unit =
   let res_ol = unopt @@ Html.CoerceTo.ol @@ get_element_by_id "results-list" in
   let page_info = unopt @@ Html.CoerceTo.div @@ get_element_by_id "page-info" in
   let occurences_text = Html.createP document in
+  let msg_div = unopt @@ Html.CoerceTo.div @@ get_element_by_id "noresult" in
 
   if not load_more
   then
     begin
       page_info##.innerHTML := js "";
       res_ol##.innerHTML := js "";
-
       result_div##.style##.display := js "block";
       occurences_text##.innerHTML := js (Printf.sprintf "<b>%d</b> results found for <b>%s<b>" result##.totaloccs (to_string current_pattern##.value##trim));
       occurences_text##.style##.textAlign := js "center";
       Dom.appendChild page_info occurences_text;
     end;
 
-  if not @@ ((to_string current_pattern##.value##trim) = "")
+  begin
+    foreach
+      (fun _ elt ->
+         let source_occ_ul = Html.createUl document in
+         (* let occ_position = Html.createA document in *)
+         let occ_line = Html.createCode document in
+         let line1 = Html.createLi document in
+         let line2 = Html.createLi document in
+         let line2_div = Html.createDiv document in
+         let line2_a = Html.createA document in
+         let line2_a_div = Html.createDiv document in
+         let line2_a_div_tab = Html.createTable document in
+         let line2_a_div_tab_body = Html.createTbody document in
+         let line2_a_div_tab_tr = Html.createTr document in
+         let line2_a_div_tab_tr_td1 = Html.createTd document in
+         let line2_a_div_tab_tr_td2 = Html.createTd document in
+         let opam_name_span = Html.createA document in
+         let opam_ns_href = concat (concat path_to_root  elt##.srcpath) (js "/index.html") in
+         let occu_path_href = (concat path_to_root elt##.occpath) in
+         let filename = Html.createSpan document in
+
+         set_attr source_occ_ul "class" (js "fulltext-ul");
+         set_attr opam_name_span "class" (js "opam-name");
+         set_attr opam_name_span "href" opam_ns_href;
+         append_inner line1 (js " In ");
+         append_inner opam_name_span elt##.opamname;
+
+         Dom.appendChild line1 opam_name_span;
+
+         append_inner line1 (js " in ");
+         set_attr filename "class" (js "f_filename");
+         append_inner filename elt##.filename;
+
+         Dom.appendChild line1 filename;
+         Dom.appendChild source_occ_ul line1;
+
+         set_attr line2_div "class" (js "link-to-docs-sources");
+         (* line2_div##.style##.marginTop := js "7px"; *)
+         set_attr line2_a_div_tab_tr_td1 "class" (js "occ-position");
+         append_inner line2_a_div_tab_tr_td1 (js (string_of_int elt##.occpos));
+
+         set_attr line2_a_div_tab_tr_td2 "class" (js "no_underline");
+         append_inner occ_line elt##.occline;
+         occ_line##.style##.color := js "black";
+         Dom.appendChild line2_a_div_tab_tr_td2 occ_line;
+
+         append_inner line2_a_div_tab_tr (js "&nbsp At line &nbsp");
+         line2_a_div_tab_tr##.style##.marginLeft := js "2%";
+
+         Dom.appendChild line2_a_div_tab_tr line2_a_div_tab_tr_td1;
+         append_inner line2_a_div_tab_tr (js "&nbsp &nbsp ");
+         Dom.appendChild line2_a_div_tab_tr line2_a_div_tab_tr_td2;
+
+         Dom.appendChild line2_a_div_tab_body line2_a_div_tab_tr;
+         Dom.appendChild line2_a_div_tab line2_a_div_tab_body;
+         Dom.appendChild line2_a_div line2_a_div_tab;
+
+         set_attr line2_a "href" occu_path_href;
+         set_attr line2_a "class" (js "no_underline no_underline.wide");
+
+         line2_a_div##.style##.marginTop := js "0%";
+
+         Dom.appendChild line2_a line2_a_div;
+         Dom.appendChild line2_div line2_a;
+         Dom.appendChild line2 line2_div;
+
+         Dom.appendChild source_occ_ul line2;
+         Dom.appendChild res_ol source_occ_ul;         
+      )
+      result##.occs
+  end;
+  msg_div##.style##.display := js "none";
+
+  if (to_string current_pattern##.value##trim) = ""
   then
     begin
-      foreach
-        (fun _ elt ->
-           let source_occ_ul = Html.createUl document in
-           (* let occ_position = Html.createA document in *)
-           let occ_line = Html.createCode document in
-           let line1 = Html.createLi document in
-           let line2 = Html.createLi document in
-           let line2_div = Html.createDiv document in
-           let line2_a = Html.createA document in
-           let line2_a_div = Html.createDiv document in
-           let line2_a_div_tab = Html.createTable document in
-           let line2_a_div_tab_body = Html.createTbody document in
-           let line2_a_div_tab_tr = Html.createTr document in
-           let line2_a_div_tab_tr_td1 = Html.createTd document in
-           let line2_a_div_tab_tr_td2 = Html.createTd document in
-           let opam_name_span = Html.createA document in
-           let opam_ns_href = concat (concat path_to_root  elt##.srcpath) (js "/index.html") in
-           let occu_path_href = (concat path_to_root elt##.occpath) in
-           let filename = Html.createSpan document in
-
-           set_attr source_occ_ul "class" (js "fulltext-ul");
-           set_attr opam_name_span "class" (js "opam-name");
-           set_attr opam_name_span "href" opam_ns_href;
-           append_inner line1 (js " In ");
-           append_inner opam_name_span elt##.opamname;
-
-           Dom.appendChild line1 opam_name_span;
-
-           append_inner line1 (js " in ");
-           set_attr filename "class" (js "f_filename");
-           append_inner filename elt##.filename;
-
-           Dom.appendChild line1 filename;
-           Dom.appendChild source_occ_ul line1;
-
-           set_attr line2_div "class" (js "link-to-docs-sources");
-           (* line2_div##.style##.marginTop := js "7px"; *)
-           set_attr line2_a_div_tab_tr_td1 "class" (js "occ-position");
-           append_inner line2_a_div_tab_tr_td1 (js (string_of_int elt##.occpos));
-
-           set_attr line2_a_div_tab_tr_td2 "class" (js "no_underline");
-           append_inner occ_line elt##.occline;
-           occ_line##.style##.color := js "black";
-           Dom.appendChild line2_a_div_tab_tr_td2 occ_line;
-
-           append_inner line2_a_div_tab_tr (js "&nbsp At line &nbsp");
-           line2_a_div_tab_tr##.style##.marginLeft := js "2%";
-
-           Dom.appendChild line2_a_div_tab_tr line2_a_div_tab_tr_td1;
-           append_inner line2_a_div_tab_tr (js "&nbsp &nbsp ");
-           Dom.appendChild line2_a_div_tab_tr line2_a_div_tab_tr_td2;
-
-           Dom.appendChild line2_a_div_tab_body line2_a_div_tab_tr;
-           Dom.appendChild line2_a_div_tab line2_a_div_tab_body;
-           Dom.appendChild line2_a_div line2_a_div_tab;
-
-           set_attr line2_a "href" occu_path_href;
-           set_attr line2_a "class" (js "no_underline no_underline.wide");
-
-           line2_a_div##.style##.marginTop := js "0%";
-
-           Dom.appendChild line2_a line2_a_div;
-           Dom.appendChild line2_div line2_a;
-           Dom.appendChild line2 line2_div;
-
-           Dom.appendChild source_occ_ul line2;
-           Dom.appendChild res_ol source_occ_ul;         
-        )
-        result##.occs
-    end
-  else
-    begin
+      msg_div##.style##.display := js "none";
       result_div##.style##.display := js "none";
-      load_more_btn##.style##.display := js "none"
+      load_more_btn##.style##.display := js "none";
     end;
+
   Headfoot.footerHandler ();
   (** Inserts the result of fulltext search given by ez_search and displays the load more button if [load_more] is
       set to true *)

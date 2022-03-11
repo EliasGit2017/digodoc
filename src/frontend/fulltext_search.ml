@@ -68,6 +68,12 @@ let append_inner elt str =
 (** [append_inner elt str] appends [str] to the content of [elt]. *)
 
 let preview_fulltext_source pattern regex case_sens loadmore =
+  let load_more_btn = unopt @@ Html.CoerceTo.button @@ get_element_by_id "load_more" in
+  let result_div = unopt @@ Html.CoerceTo.div @@ get_element_by_id "result-div" in
+  let current_pattern = unopt @@ Html.CoerceTo.input @@ get_element_by_id "fpattern_fulltext" in
+  let msg_div = unopt @@ Html.CoerceTo.div @@ get_element_by_id "noresult" in
+  let res_ol = unopt @@ Html.CoerceTo.ol @@ get_element_by_id "results-list" in
+  let page_info = unopt @@ Html.CoerceTo.div @@ get_element_by_id "page-info" in
   let handle_checkbox id state =
     let target =
       match id with
@@ -94,7 +100,30 @@ let preview_fulltext_source pattern regex case_sens loadmore =
   Requests.send_generic_request
     ~request:(Requests.getSources_fulltext @@ fulltext_search_state_to_sources_search_info @@ fulltext_info)
     ~callback:(fun sources_results ->
-        Insertion.insert_Fulltext_Sources (Objects.sources_search_result_to_jsoo sources_results) loadmore;
+        if sources_results.totaloccs = 0
+        then 
+          begin
+            msg_div##.style##.display := js "none";
+            page_info##.innerHTML := js "";
+            res_ol##.innerHTML := js "";
+            load_more_btn##.style##.display := js "none";
+            result_div##.style##.display := js "none";
+            Insertion.write_message_id ("No results found for " ^ (to_string current_pattern##.value)) "noresult" "nores_msg";
+          end
+        else 
+          begin
+            if sources_results.occs = []
+            then 
+              begin
+                load_more_btn##.style##.display := js "none";
+                Headfoot.footerHandler();
+              end
+            else
+              begin
+                load_more_btn##.style##.display := js "block";
+                Insertion.insert_Fulltext_Sources (Objects.sources_search_result_to_jsoo sources_results) loadmore;
+              end;
+          end;
         Lwt.return_unit
       )
     ~error:(fun err ->
@@ -202,10 +231,13 @@ let set_handlers () =
         match Option.map to_string @@ Optdef.to_option @@ kbevent##.key with
         | Some "Escape" ->
             regex_inst##.style##.display := js "none";
-
+        | Some "BackSpace" -> 
+            if cur_input_value = js ""
+            then ()
         | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
       end;
-      load_more_btn##.style##.display := js "block";
+      (* load_more_btn##.style##.display := js "block"; *)
+      (* change place asap *)
       _false
     );
   (** Query search-api and display result 20 by 20 *)
@@ -262,6 +294,7 @@ let set_handlers () =
       let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
       let current_last = !search_state.last_match_id in
       state.last_match_id <- current_last + 20;
+      (* Show current last_match_id for debug *)
       logs @@ string_of_int @@ current_last;
       preview_fulltext_source (to_string cur_input_value) is_regex case_sens true;
       _false
