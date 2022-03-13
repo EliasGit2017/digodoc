@@ -180,7 +180,7 @@ let pp_class_sig_item fmt sig_item =
             Format.fprintf fmt "val %s@." name
 
 
-(** [pp_class_contents fmt class_decl] Prints a class and its contents *)
+(** [pp_class_type_contents fmt class_decl] Prints a class and its contents *)
 let pp_class_contents fmt class_decl =
     let open Outcometree in
 
@@ -214,11 +214,11 @@ let pp_class fmt tree =
      *)
     match tree with
     | Osig_class_type (_b1, _s1, _l, out_class_ty, _out_rec_status) ->
-            Format.fprintf fmt "%a" pp_class_contents out_class_ty
+        Format.fprintf fmt "%a" pp_class_contents out_class_ty
     | _ -> failwith "should not occur"
 
     (** [getTypes cmi_sign] match on and print type and class signatures for later indexation in DB *)
-let getTypes {cmi_sign; _} =
+let getTypes {cmi_sign; _} path =
     List.filter_map
         (function
          (* For documentation on the types matched here see:
@@ -243,7 +243,7 @@ let getTypes {cmi_sign; _} =
                                 Some (ident, "TYPE_VARIANT", constructors )
                         | Type_open -> Some (ident, "TYPE_OPEN", Format.asprintf "%a" pp_type ([], tree) )
             end
-            | Sig_class_type (id, class_type_declaration, rec_status, _visibility) ->
+            | Sig_class_type (id, class_type_declaration, rec_status, _visibility) -> begin
                     let ident = infix (Ident.name id) in
                     let tree =
                         (Printtyp.tree_of_cltype_declaration id) class_type_declaration rec_status
@@ -251,6 +251,9 @@ let getTypes {cmi_sign; _} =
                     let obj_items =
                         Format.asprintf "%a" pp_class tree
                     in
-                    Some (ident, "CLASS_OBJ", obj_items)
+                    if Array.mem ("class-type-" ^ ident) (Sys.readdir path)
+                    then Some (ident, "CLASS_TYPE", obj_items)
+                    else Some (ident, "CLASS", obj_items)
+            end
             | _ -> None
         ) cmi_sign

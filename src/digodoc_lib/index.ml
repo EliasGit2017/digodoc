@@ -114,11 +114,11 @@ module SAVE = struct
       ) (Cmt.getVals @@ Option.get mdl.mdl_cmi_info);
     close_out oc
 
-  let save_module_types file mdl =
+  let save_module_types file mdl mdl_path =
     match mdl.mdl_cmi_info with
     | None -> ()
     | Some mdl_cmi_info ->
-        match Cmt.getTypes mdl_cmi_info with
+        match Cmt.getTypes mdl_cmi_info mdl_path with
         | [] -> ()
         | type_sig_list ->
             let oc = open_out file in
