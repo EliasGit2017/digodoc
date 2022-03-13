@@ -81,7 +81,7 @@
             </td>
             <td>
               <input type="checkbox" id="fclasses" name="fclasses" value="Classes">
-              <label for="fclass">Classes</label>
+              <label for="fclasses">Classes</label>
             </td>
           </tr>
           <tr>
@@ -123,6 +123,7 @@
       </table>
     </form>
   </div>
+
 </div>
 
 <div id="entries-nav" style="display: none;">
@@ -153,13 +154,19 @@
   </div>
   <nav id="pagination-nav">
     <a id="previous-page" style="display: none;" href="">
-      <svg width="29" height="29" viewBox="0 0 29 29" xmlns="http://www.w3.org/2000/svg"><circle fill="#D6D6D5" cx="14.5" cy="14.5" r="14.5"></circle><path fill="#FFF" d="M14.5 19v-3h5v-3h-5v-3L9 14.5z"></path></svg>
+      <svg width="29" height="29" viewBox="0 0 29 29" xmlns="http://www.w3.org/2000/svg">
+        <circle fill="#D6D6D5" cx="14.5" cy="14.5" r="14.5"></circle>
+        <path fill="#FFF" d="M14.5 19v-3h5v-3h-5v-3L9 14.5z"></path>
+      </svg>
     </a>
     <ol id="pages">
     </ol>
     <a id="next-page" style="display: none;" href="">
-      <svg width="29" height="29" viewBox="0 0 29 29" xmlns="http://www.w3.org/2000/svg"><circle fill="#D6D6D5" cx="14.5" cy="14.5" r="14.5"></circle><path fill="#FFF" d="M15 19v-3h-5v-3h5v-3l5.5 4.5z"></path></svg>
+      <svg width="29" height="29" viewBox="0 0 29 29" xmlns="http://www.w3.org/2000/svg">
+        <circle fill="#D6D6D5" cx="14.5" cy="14.5" r="14.5"></circle>
+        <path fill="#FFF" d="M15 19v-3h-5v-3h5v-3l5.5 4.5z"></path>
+      </svg>
     </a>
   </nav>
 </div>
-
+<button type="button" id="load_more" class="load_more_btn" style="display: none;" >Load More</button>

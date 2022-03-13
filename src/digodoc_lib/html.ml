@@ -224,8 +224,6 @@ let add_header_footer () =
                 else ""
             | "search" -> EZ_SUBST.string (file_content "search.html") ~ctxt:() ~brace
             (* trying to add fulltext search page *)
-            | "fulltext_search" ->
-                EZ_SUBST.string (file_content "fulltext_search.html") ~ctxt:() ~brace
             | _ -> 
                 Printf.kprintf failwith "Unknown var %S" var
           in

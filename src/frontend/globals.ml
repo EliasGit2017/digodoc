@@ -105,7 +105,7 @@ let unopt (opt : 'a opt) : 'a  =
 
 let concat (str1 : js_string t) (str2 : js_string t) : js_string t =
   str1##concat str2
-(** [concat str1 str2] is the same as [str1##conat str2]. *)
+(** [concat str1 str2] is the same as [str1##concat str2]. *)
 
 let foreach (f : int -> 'a -> unit) (a : 'a js_array t) : unit =
   a##forEach(wrap_callback (fun elt i _ -> f i elt))   
@@ -196,7 +196,12 @@ let is_index_page : bool =
   in_root_directory 
   && not (String.equal filename "about.html")
   && not (String.equal filename "search.html")
+  && not (String.equal filename "fulltext_search.html")
 (** Says if current file is index page *)
+
+let is_fulltext_page : bool =
+  path.(0) = "fulltext_search.html"
+(** Says if current file is a fulltext_search page *)
 
 let is_doc_page : bool =
   path.(0) = "docs"

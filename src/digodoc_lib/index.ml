@@ -620,8 +620,8 @@ let generate () =
     ~filename:"fulltext_search.html"
     ~title:"Fulltext"
     (fun bb ~title ->
-       header bb ~title;
-       trailer bb;
+       ignore title;
+       Printf.bprintf bb "%s" (Utils.file_content "fulltext_search.html");
     );
 
     Printf.eprintf "Index generation done.\n%!";

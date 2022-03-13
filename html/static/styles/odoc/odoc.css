@@ -176,25 +176,42 @@ body {
   width    : 100%
 }
 
-.toc {
-  position:
-    /*absolute*/
+/*
+position:
+    absolute
     fixed;
   top: calc(0.5 * var(--size-line))
-    /*0px*/
+    0px
   ;
   left       : -3%;
   text-align : left;
   width      : 15%;
   margin-left: 5%
-    /*-200px*/
+    -200px
   ;
   margin-top: calc(3 * var(--size-line))
-    /*0px*/
+    0px
   ;
   margin-right: var(--size-line);
-  /*border-top: solid thin var(--color-rule);*/
+  border-top: solid thin var(--color-rule);
   border-right: solid thin var(--color-rule);
+  max-height  : fit-content;
+  */
+
+.toc {
+  position      : fixed;
+  top           : calc(8 * var(--size-line));
+  left          : -3%;
+  text-align    : left;
+  width         : 15%;
+  margin-left   : 5%;
+  margin-top    : calc(1.5 * var(--size-line));
+  margin-right  : var(--size-line);
+  border-top    : none;
+  border-right  : solid thin var(--color-rule);
+  height        : 60%;
+  display       : flex;
+  flex-direction: column;
 }
 
 /* Horizontal rules. The way to do it is not so nice, e.g. for
@@ -359,8 +376,10 @@ a.digodoc-lib {
 
 /* Linked highlight */
   {
-  background-color: var(--color-bg-highlight);
+  /* background-color: var(--color-bg-highlight); */
   border-radius   : 5px;
+  background: linear-gradient(0.25turn, #659CD6, 5%, #F6F6F6);
+  border: none;
 }
 
 .xref-unresolved {
@@ -382,10 +401,19 @@ a.digodoc-lib {
 }
 
 .toc ul {
+  /* font-family    : var(--font-headings);
+  text-transform : uppercase;
+  margin-top     : var(--size-line);
+  list-style-type: none; */
   font-family    : var(--font-headings);
   text-transform : uppercase;
   margin-top     : var(--size-line);
   list-style-type: none;
+  flex           : 1;
+  flex-grow      : 1;
+  flex-shrink    : 1;
+  flex-basis     : 0%;
+  overflow-y     : auto;
 }
 
 .toc ul ul {
@@ -401,7 +429,7 @@ a.digodoc-lib {
 .toc li {
   margin-left : 0;
   padding-left: 1ch;
-  text-indent : -1ch;
+  text-indent : 0ch;
 }
 
 .toc>ul>li {
@@ -563,7 +591,7 @@ pre code {
   font-size       : inherit;
   color           : white;
   background-color: #000000;
-  padding-left    : 10px;
+  /* padding-left    : 10px; */
 }
 
 /* don't apply transform twice... */
@@ -1277,6 +1305,23 @@ td.warning-msg span {
   overflow                  : hidden;
 }
 
+.fulltext-form-div {
+  text-align                : center;
+  margin-top                : -15px;
+  width                     : 100%;
+  background                : linear-gradient(#659CD6, 85%, #F6F6F6);
+  margin-bottom             : 10px;
+  border                    : 0px solid #c4c4c4;
+  padding                   : 20px;
+  border-top-left-radius    : 0px;
+  border-top-right-radius   : 0px;
+  border-bottom-left-radius : 20px;
+  border-bottom-right-radius: 20px;
+  max-width                 : 110ch;
+  display                   : none;
+  overflow                  : hidden;
+}
+
 .search-form {
   display: inline-block;
 }
@@ -1325,7 +1370,7 @@ td.warning-msg span {
 }
 
 #result-div {
-  max-width: 100ch;
+  max-width: 110ch;
   width    : 100%;
 }
 
@@ -1339,11 +1384,6 @@ a.val {
 
 .type-annot {
   color: #B57EDC
-}
-
-#result-div {
-  max-width: 110ch;
-  width    : 100%;
 }
 
 /****************** #New search forms *******************************************/
@@ -1373,31 +1413,20 @@ a.val {
   border-top-width   : 1px;
   border-right-color : rgb(196, 196, 196);
   border-right-style : solid;
-  border-right-width : 1px;
+  border-right-width : 0px;
   border-bottom-color: rgb(196, 196, 196);
   border-bottom-style: solid;
   border-bottom-width: 0px;
   /*no bottom after collapse*/
   border-left-color  : rgb(196, 196, 196);
   border-left-style  : solid;
-  border-left-width  : 1px;
+  border-left-width  : 0px;
   border-image-outset: 0;
   border-image-repeat: stretch;
   border-image-slice : 100%;
   border-image-source: none;
   border-image-width : 1;
 }
-
-/* .collapsible-div:after {
-  content: "\002B";
-  font-weight: bold;
-  float: right;
-}
-
-.collapsible-div:active:after {
-  content: "\2212";
-} */
-
 
 .inner-collapsible-content {
   /*padding: 0 18px;*/
@@ -1663,11 +1692,11 @@ input[type="checkbox"]:checked~input {
 }*/
 
 .submitstyle {
-  margin-top: 10px;
-  width     : 100px;
-  height    : 40px;
+  margin-top   : 10px;
+  width        : 100px;
+  height       : 40px;
   border-radius: 10px;
-  border-style: hidden;
+  border-style : hidden;
 }
 
 /******************************************************************************************/
@@ -1790,9 +1819,89 @@ input[type="checkbox"]:checked~input {
   transform        : translateX(-190%) translateY(-30%) scale(0);
 }
 
+.regex_instructions {
+  background    : #F8F8F8;
+  border        : 5px solid #DFDFDF;
+  color         : #717171;
+  font-size     : 13px;
+  height        : 250px;
+  width         : 310px;
+  letter-spacing: 1px;
+  line-height   : 20px;
+  position      : absolute;
+  text-align    : center;
+  text-transform: uppercase;
+  top           : auto;
+  left          : auto;
+  display       : none;
+  padding       : 0 0px;
+}
+
+/* Fulttext results display*/
+
+.fulltext-ul {
+  border       : 1px solid #3a89ce;
+  border-radius: 5px;
+}
+
+.fulltext-ul>li::marker {
+  /* content: "👉"; */
+  content: "🐪";
+}
+
+.opam-name::after {
+  color: #874aa9;
+}
+
+.f_filename {
+  color: #4CAF50;
+}
+
+.occ-position {
+  margin-left: 2%;
+}
+
+.no_underline {
+  text-decoration: none;
+}
+
+.link-to-docs-sources {
+  margin-top: -10px;
+}
+
+.link-to-docs-sources:hover {
+  border-radius   : 5px;
+  background-color: #dddddd;
+}
+
+.load_more_btn {
+  margin-top                : 10px;
+  background                : linear-gradient(#874aa9, 5%, #659CD6);
+  color                     : whitesmoke;
+  cursor                    : pointer;
+  padding                   : 20px;
+  width                     : 100%;
+  max-width                 : 20ch;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius : 10px;
+  border-top-left-radius    : 10px;
+  border-top-right-radius   : 10px;
+  text-align                : left;
+  outline                   : none;
+  font-size                 : var(--size-font-mono-ratio);
+  text-align                : center;
+}
+
+
 /* Some media queries to handle elements when resizing window */
 
 @media only screen and (max-width: 1700px) {
-  .toc {top: calc(10 * var(--size-line));} /*Put table of content at the level of letter selection*/
-  .content {padding-left : calc(7.5 * var(--size-line));}
+  .toc {
+    top: calc(5 * var(--size-line));
+  }
+
+  /*Put table of content at the level of letter selection*/
+  .content {
+    padding-left: calc(7.5 * var(--size-line));
+  }
 }
