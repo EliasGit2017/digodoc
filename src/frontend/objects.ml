@@ -100,6 +100,7 @@ type nonrec class_element = Data_types.class_element = {
   ident : string;
   mdl : string;
   mdlpath : string;
+  isclasstype : int;
   opam : string;
   opampath : string;
 } [@@deriving jsoo]
