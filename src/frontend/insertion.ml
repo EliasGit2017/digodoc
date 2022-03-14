@@ -867,7 +867,7 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> bool -> unit =
          Dom.appendChild source_occ_ul line1;
 
          set_attr line2_div "class" (js "link-to-docs-sources");
-         
+         (* line2_div##.style##.marginTop := js "7px"; *)
          set_attr line2_a_div_tab_tr_td1 "class" (js "occ-position");
          append_inner line2_a_div_tab_tr_td1 (js (string_of_int elt##.occpos));
 
