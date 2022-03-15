@@ -221,23 +221,46 @@ let set_handlers () =
   (** Handler for the makefile checkbox . The user must select one type of files to perform fulltext search, ML by default.
       If changed, then a new request is sent to the API to retrieve the corresponding results. *)
 
+  (* match Option.map to_string @@ Optdef.to_option @@ kbevent##.key with
+          (* Do not send query if input is empty, or if user pressed escape or arrowkeys ... *)
+          | Some "Escape" ->
+              regex_inst##.style##.display := js "none";
+              ()
+          | Some "BackSpace" ->  
+              if cur_input_value = js ""
+              then ()
+          | Some "ArrowUp" -> ()
+          | Some "ArrowDown" -> ()
+          | Some "ArrowLeft" -> ()
+          | Some "ArrowRight" -> ()
+          | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens false; *)
+
   fulltext_form##.onkeyup := Html.handler (fun kbevent ->
       let cur_input_value = fulltext_form##.value##trim in
       let is_regex = to_bool @@ (get_input "fregex")##.checked in
       let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
       let regex_inst = unopt @@ Html.CoerceTo.div @@ get_element_by_id "regex_instructions" in
       state.last_match_id <- 0;
-      begin
-        match Option.map to_string @@ Optdef.to_option @@ kbevent##.key with
-        | Some "Escape" ->
-            regex_inst##.style##.display := js "none";
-        | Some "BackSpace" -> 
-            (* Do not send query if input is empty, thinking about cleaning result div here ... *) 
-            if cur_input_value = js ""
-            then ()
-        | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
-      end;
-      _false
+      let key_management (kbevent) =
+        begin
+          match Option.map to_string @@ Optdef.to_option @@ kbevent##.key with
+          (* Do not send query if input is empty, or if user pressed escape or arrowkeys ... *)
+          | Some "Escape" ->
+              regex_inst##.style##.display := js "none";
+              ()
+          | Some "BackSpace" ->  
+              if cur_input_value = js ""
+              then ()
+          | Some "ArrowUp" -> ()
+          | Some "ArrowDown" -> ()
+          | Some "ArrowLeft" -> ()
+          | Some "ArrowRight" -> ()
+          | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
+        end 
+      in
+
+      window##setTimeout((Js.wrap_callback (fun _ -> key_management(kbevent))) 800.);
+        _false
     );
   (** Query search-api and display result 20 by 20 *)
 
