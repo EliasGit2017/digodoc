@@ -130,7 +130,7 @@ let preview_fulltext_source pattern regex case_sens loadmore =
         begin
           match err with
           | Unknown -> logs "something is wrong in preview_fulltext_source";
-          | _ -> warn "Work is needed here";
+          | _ -> warn "fulltext_search.ml/preview_fulltext_source needs to be corrected";
         end;
         Lwt.return_unit
       )
@@ -232,12 +232,11 @@ let set_handlers () =
         | Some "Escape" ->
             regex_inst##.style##.display := js "none";
         | Some "BackSpace" -> 
+            (* Do not send query if input is empty, thinking about cleaning result div here ... *) 
             if cur_input_value = js ""
             then ()
         | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
       end;
-      (* load_more_btn##.style##.display := js "block"; *)
-      (* change place asap *)
       _false
     );
   (** Query search-api and display result 20 by 20 *)
@@ -294,8 +293,6 @@ let set_handlers () =
       let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
       let current_last = !search_state.last_match_id in
       state.last_match_id <- current_last + 20;
-      (* Show current last_match_id for debug *)
-      logs @@ string_of_int @@ current_last;
       preview_fulltext_source (to_string cur_input_value) is_regex case_sens true;
       _false
     )
