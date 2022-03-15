@@ -574,8 +574,15 @@ let insert_classes_search : classes_jsoo t -> unit =
        Dom.appendChild classl classl_word;
        (* Append class name *)
        let classl_ident = Html.createA document in
-       let classl_href = concat (js "#class-") elt##.ident in
-       set_attr classl_ident "href" @@ concat elt##.mdlpath classl_href;
+       (* let classl_href = concat (js "#class-") elt##.ident in *)
+
+       let classl_href = ref (js "") in
+
+       if elt##.isclasstype > 0
+       then classl_href := concat (js "#class-type-") elt##.ident
+       else classl_href := concat (js "#class-") elt##.ident;
+
+       set_attr classl_ident "href" @@ concat elt##.mdlpath !classl_href;
        set_attr classl_ident "class" (js "val");
        append_inner classl_ident elt##.ident;
        append_inner classl (js " : ");
@@ -867,7 +874,7 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> bool -> unit =
          Dom.appendChild source_occ_ul line1;
 
          set_attr line2_div "class" (js "link-to-docs-sources");
-         (* line2_div##.style##.marginTop := js "7px"; *)
+
          set_attr line2_a_div_tab_tr_td1 "class" (js "occ-position");
          append_inner line2_a_div_tab_tr_td1 (js (string_of_int elt##.occpos));
 

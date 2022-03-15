@@ -495,7 +495,6 @@ let set_handlers () =
   let slider_show_hide = unopt @@ Html.CoerceTo.input @@ get_element_by_id "fregex" in
   let toggle_entry_form = unopt @@ Html.CoerceTo.button @@ get_element_by_id "col_entry" in
   let toggle_element_form = unopt @@ Html.CoerceTo.button @@ get_element_by_id "col_funcs" in
-  let toggle_fulltext_form = unopt @@ Html.CoerceTo.button @@ get_element_by_id "col_fulltext" in
   let pack_tag_handling = unopt @@ Html.CoerceTo.input @@ get_element_by_id "ftextpackages" in
   let mod_tag_handling = unopt @@ Html.CoerceTo.input @@ get_element_by_id "ftextmodules" in
   let toogle_form formname = 
@@ -554,10 +553,8 @@ let set_handlers () =
   (* Show / Hide package and module checkbox in element-form when slider is checked / unchecked *)
   toggle_entry_form##.onclick := Html.handler (fun _ ->
       let hide_this = get_element_by_id "element-search-content" in
-      let hide_this2 = get_element_by_id "fulltext-search-content" in
       let show_this = get_element_by_id "entry-search-content" in
       hide_this##.style##.display := js "none";
-      hide_this2##.style##.display := js "none";
       show_this##.style##.display := js "block";
       _false
     );
@@ -566,24 +563,11 @@ let set_handlers () =
   toggle_element_form##.onclick := Html.handler (fun _ ->
       let show_this = get_element_by_id "element-search-content" in
       let hide_this = get_element_by_id "entry-search-content" in
-      let hide_this2 = get_element_by_id "fulltext-search-content" in
       hide_this##.style##.display := js "none";
-      hide_this2##.style##.display := js "none";
       show_this##.style##.display := js "block";
       _false
     );
   (**Show element-form's div when button having id="col_funcs" is clicked and hide other form's div *)
-
-  toggle_fulltext_form##.onclick := Html.handler (fun _ ->
-      let show_this = get_element_by_id "fulltext-search-content" in
-      let hide_this = get_element_by_id "entry-search-content" in
-      let hide_this2 = get_element_by_id "element-search-content" in
-      hide_this##.style##.display := js "none";
-      hide_this2##.style##.display := js "none";
-      show_this##.style##.display := js "block";
-      _false
-    );
-  (**Show fulltext-search-form's div when button having id="col_fulltext" is clicked and hide other form's div *)
 
 
   pack_tag_handling##.onkeyup := Html.handler (fun kbevent ->
