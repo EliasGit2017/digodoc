@@ -96,44 +96,55 @@ let preview_fulltext_source pattern regex case_sens loadmore =
   handle_checkbox "fcase_ftype_ml" fulltext_info;
   handle_checkbox "fcase_ftype_dune" fulltext_info;
   handle_checkbox "fcase_ftype_makefile" fulltext_info;
-  Lwt.async @@
-  Requests.send_generic_request
-    ~request:(Requests.getSources_fulltext @@ fulltext_search_state_to_sources_search_info @@ fulltext_info)
-    ~callback:(fun sources_results ->
-        if sources_results.totaloccs = 0
-        then 
+  if not @@ ((to_string current_pattern##.value##trim) = "")
+  then
+    Lwt.async @@
+    Requests.send_generic_request
+      ~request:(Requests.getSources_fulltext @@ fulltext_search_state_to_sources_search_info @@ fulltext_info)
+      ~callback:(fun sources_results ->
+          if sources_results.totaloccs = 0
+          then 
+            begin
+              msg_div##.style##.display := js "none";
+              page_info##.innerHTML := js "";
+              res_ol##.innerHTML := js "";
+              load_more_btn##.style##.display := js "none";
+              result_div##.style##.display := js "none";
+              Insertion.write_message_id ("No results found for " ^ (to_string current_pattern##.value)) "noresult" "nores_msg";
+            end
+          else 
+            begin
+              if sources_results.occs = []
+              then 
+                begin
+                  load_more_btn##.style##.display := js "none";
+                  Headfoot.footerHandler();
+                end
+              else
+                begin
+                  load_more_btn##.style##.display := js "block";
+                  Insertion.insert_Fulltext_Sources (Objects.sources_search_result_to_jsoo sources_results) loadmore;
+                end;
+            end;
+          Lwt.return_unit
+        )
+      ~error:(fun err ->
           begin
-            msg_div##.style##.display := js "none";
-            page_info##.innerHTML := js "";
-            res_ol##.innerHTML := js "";
-            load_more_btn##.style##.display := js "none";
-            result_div##.style##.display := js "none";
-            Insertion.write_message_id ("No results found for " ^ (to_string current_pattern##.value)) "noresult" "nores_msg";
-          end
-        else 
-          begin
-            if sources_results.occs = []
-            then 
-              begin
-                load_more_btn##.style##.display := js "none";
-                Headfoot.footerHandler();
-              end
-            else
-              begin
-                load_more_btn##.style##.display := js "block";
-                Insertion.insert_Fulltext_Sources (Objects.sources_search_result_to_jsoo sources_results) loadmore;
-              end;
+            match err with
+            | Unknown -> logs "something is wrong in preview_fulltext_source";
+            | _ -> warn "fulltext_search.ml/preview_fulltext_source needs to be corrected";
           end;
-        Lwt.return_unit
-      )
-    ~error:(fun err ->
-        begin
-          match err with
-          | Unknown -> logs "something is wrong in preview_fulltext_source";
-          | _ -> warn "fulltext_search.ml/preview_fulltext_source needs to be corrected";
-        end;
-        Lwt.return_unit
-      )
+          Lwt.return_unit
+        )
+  else
+    begin
+      msg_div##.style##.display := js "none";
+      page_info##.innerHTML := js "";
+      res_ol##.innerHTML := js "";
+      load_more_btn##.style##.display := js "none";
+      result_div##.style##.display := js "none";
+      Headfoot.footerHandler();
+    end
 (** Request to get [Data_types.sources_search_result] *)
 
 let set_handlers () =
@@ -241,26 +252,22 @@ let set_handlers () =
       let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
       let regex_inst = unopt @@ Html.CoerceTo.div @@ get_element_by_id "regex_instructions" in
       state.last_match_id <- 0;
-      let key_management (kbevent) =
-        begin
-          match Option.map to_string @@ Optdef.to_option @@ kbevent##.key with
-          (* Do not send query if input is empty, or if user pressed escape or arrowkeys ... *)
-          | Some "Escape" ->
-              regex_inst##.style##.display := js "none";
-              ()
-          | Some "BackSpace" ->  
-              if cur_input_value = js ""
-              then ()
-          | Some "ArrowUp" -> ()
-          | Some "ArrowDown" -> ()
-          | Some "ArrowLeft" -> ()
-          | Some "ArrowRight" -> ()
-          | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
-        end 
-      in
-
-      window##setTimeout((Js.wrap_callback (fun _ -> key_management(kbevent))) 800.);
-        _false
+      begin
+        match Option.map to_string @@ Optdef.to_option @@ kbevent##.key with
+        (* Do not send query if input is empty, or if user pressed escape or arrowkeys ... *)
+        | Some "Escape" ->
+            regex_inst##.style##.display := js "none";
+            ()
+        | Some "BackSpace" ->  
+            if cur_input_value = js ""
+            then ()
+        | Some "ArrowUp" -> ()
+        | Some "ArrowDown" -> ()
+        | Some "ArrowLeft" -> ()
+        | Some "ArrowRight" -> ()
+        | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
+      end;
+      _false
     );
   (** Query search-api and display result 20 by 20 *)
 
