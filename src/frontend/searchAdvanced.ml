@@ -661,6 +661,7 @@ let set_handlers () =
       end;
       (* fills form from state *)
       update_form ();
+      Headfoot.footerHandler ();
       _false
     )
 (** Sets handlers to forms and buttons from search page. Submit event handler of a form redirect to the

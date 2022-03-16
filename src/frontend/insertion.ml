@@ -540,7 +540,6 @@ let insert_types_search : types_jsoo t -> unit =
        set_attr typel_ident "class" (js "val");
        append_inner typel_ident elt##.ident;
        Dom.appendChild typel typel_ident;
-       append_inner typel (js " : ");
        (* Append type package *)
        append_inner typel (js " in opam ");
        let typel_opam = Html.createA document in
@@ -570,7 +569,11 @@ let insert_classes_search : classes_jsoo t -> unit =
        (* Append keyword 'class' *)
        let classl_word = Html.createSpan document in
        set_attr classl_word "class" (js "keyword");
-       append_inner classl_word (js "class ");
+       
+       if elt##.isclasstype > 0
+       then append_inner classl_word (js "class type ")
+       else append_inner classl_word (js "class ");
+
        Dom.appendChild classl classl_word;
        (* Append class name *)
        let classl_ident = Html.createA document in
@@ -585,7 +588,7 @@ let insert_classes_search : classes_jsoo t -> unit =
        set_attr classl_ident "href" @@ concat elt##.mdlpath !classl_href;
        set_attr classl_ident "class" (js "val");
        append_inner classl_ident elt##.ident;
-       append_inner classl (js " : ");
+       Dom.appendChild classl classl_ident;
        (* Append class package *)
        append_inner classl (js " in opam ");
        let classl_opam = Html.createA document in
