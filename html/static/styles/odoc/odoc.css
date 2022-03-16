@@ -512,6 +512,12 @@ dt.spec {
   background-color           : #e5e5e5;
 }
 
+dt.spec:target {
+  border-radius   : 5px;
+  background: linear-gradient(0.25turn, #cfdceb, 5%, #e5e5e5);
+  border: none;
+}
+
 td.field>a.anchor,
 td.constructor>a.anchor,
 dt.spec>a.anchor {
