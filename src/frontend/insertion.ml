@@ -844,7 +844,6 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> bool -> unit =
     foreach
       (fun _ elt ->
          let source_occ_ul = Html.createUl document in
-         (* let occ_position = Html.createA document in *)
          let occ_line = Html.createCode document in
          let line1 = Html.createLi document in
          let line2 = Html.createLi document in

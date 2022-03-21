@@ -118,6 +118,7 @@ let preview_fulltext_source pattern regex case_sens loadmore =
               then 
                 begin
                   load_more_btn##.style##.display := js "none";
+                  res_ol##.innerHTML := js "";
                   Headfoot.footerHandler();
                 end
               else
@@ -146,6 +147,16 @@ let preview_fulltext_source pattern regex case_sens loadmore =
       Headfoot.footerHandler();
     end
 (** Request to get [Data_types.sources_search_result] *)
+
+let setInterval f time =
+  let interval_id = window##setInterval f time in
+  (fun _ -> window##clearInterval (interval_id))
+(** SetInterval function *)
+
+let setTimeout f time =
+  let interval_id = window##setTimeout f time in
+  (fun _ -> window##clearTimeout (interval_id))
+(** SetTimeout function *)
 
 let set_handlers () =
   let fulltext_form = unopt @@ Html.CoerceTo.input @@ get_element_by_id "fpattern_fulltext" in
@@ -251,8 +262,10 @@ let set_handlers () =
       let is_regex = to_bool @@ (get_input "fregex")##.checked in
       let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
       let regex_inst = unopt @@ Html.CoerceTo.div @@ get_element_by_id "regex_instructions" in
+
       state.last_match_id <- 0;
-      begin
+
+      let key_wait () =
         match Option.map to_string @@ Optdef.to_option @@ kbevent##.key with
         (* Do not send query if input is empty, or if user pressed escape or arrowkeys ... *)
         | Some "Escape" ->
@@ -265,11 +278,20 @@ let set_handlers () =
         | Some "ArrowDown" -> ()
         | Some "ArrowLeft" -> ()
         | Some "ArrowRight" -> ()
-        | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
-      end;
+        | _ -> 
+            begin
+              logs "sending request ";
+              preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
+            end
+      in
+      (* let interval = setInterval (Js.wrap_callback (fun _ -> key_wait())) 1.5 in *)
+      logs "<==== waiting ??";
+      setTimeout (Js.wrap_callback (fun _ -> key_wait ())) 1.8 |> ignore;
+      (* setTimeout interval 700. |> ignore; *)
+      logs "====> waiting Done";
       _false
     );
-  (** Query search-api and display result 20 by 20 *)
+  (** Query search-api and display results 20 by 20 *)
 
   fulltext_form##.onpointerenter := Html.handler (fun _ ->
       let time = 800. in
