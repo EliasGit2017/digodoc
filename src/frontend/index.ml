@@ -48,23 +48,23 @@ let observer : IntersectionObserver.intersectionObserver t =
   let f : intersectionObserverEntry t js_array t -> intersectionObserver t -> unit = 
     (* Callback called when marker becomes visible on the page *)
     (fun entries _ ->
-        let entry = unoptdef @@ array_get entries 0 in
-        if entry##.isIntersecting = _true then begin
-          (* Send requests *)
-          Lwt.async @@ 
-            Requests.send_generic_request
-              ~request:(Requests.getEntries entry_state)
-              ~callback:(fun entries ->
-                if not @@ Utils.empty_entries entries 
-                then begin
-                  (* insert request results in the page  *)
-                  Insertion.insert_index entries;
-                  (* update state *)
-                  entry_state.last_id <- entry_state.last_id + 50;
-                end;
-                Lwt.return_unit
-              )
-        end;
+       let entry = unoptdef @@ array_get entries 0 in
+       if entry##.isIntersecting = _true then begin
+         (* Send requests *)
+         Lwt.async @@ 
+         Requests.send_generic_request
+           ~request:(Requests.getEntries entry_state)
+           ~callback:(fun entries ->
+               if not @@ Utils.empty_entries entries 
+               then begin
+                 (* insert request results in the page  *)
+                 Insertion.insert_index entries;
+                 (* update state *)
+                 entry_state.last_id <- entry_state.last_id + 50;
+               end;
+               Lwt.return_unit
+             )
+       end;
     )
   and options : intersectionObserverOptions t = empty_intersection_observer_options () in
   let a : float js_array t= new%js array_empty  in
@@ -82,31 +82,32 @@ let current_entry () =
   | "metas.html" -> META
   | "sources.html" -> SRC
   | _ -> 
-    raise @@ 
+      raise @@ 
       web_app_error 
         (Printf.sprintf "current_entry: Not recognised index page : %s" filename)
 (** Returns entry type by looking up the current filename *)
 
 let clear_page () =
+  Headfoot.hider();
   (* Remove entries from '0' to '9' *)
   for index = 48 to 57 do
     let set_opt = get_element_by_id_opt ("packages-" ^ (from_char_code index)) in
     Opt.iter set_opt (fun set -> 
-      (* Remove entries *)
-      set##.innerHTML := js "";
-      (* Remove header *)
-      let title = get_element_by_id ("name-" ^ (from_char_code index)) in
-      title##.style##.display := js "none")
+        (* Remove entries *)
+        set##.innerHTML := js "";
+        (* Remove header *)
+        let title = get_element_by_id ("name-" ^ (from_char_code index)) in
+        title##.style##.display := js "none")
   done;
   (* Remove entries from 'a' to 'z' *)
   for index = 97 to 122 do
     let set_opt = get_element_by_id_opt ("packages-" ^ (from_char_code index)) in
     Opt.iter set_opt (fun set ->
-      (* Remove entries *)
-      set##.innerHTML := js "";
-      (* Remove header *)
-      let title = get_element_by_id ("name-" ^ (from_char_code index)) in
-      title##.style##.display := js "none")
+        (* Remove entries *)
+        set##.innerHTML := js "";
+        (* Remove header *)
+        let title = get_element_by_id ("name-" ^ (from_char_code index)) in
+        title##.style##.display := js "none")
   done
 (** Clear index page by removing all entries line and headers *)
 
@@ -115,50 +116,50 @@ let update_entries_indicator number =
   and entry = Utils.entry_type_to_string entry_state.entry in
   indicator##.innerHTML := js (number ^ " " ^ entry)
 (** Updates entries indicator with the number specified in argument. *)  
-      
+
 let update_entries_number () = 
   Requests.send_generic_request
-      ~request:(Requests.getNumber @@ Entry entry_state)
-      ~callback:(fun number ->
+    ~request:(Requests.getNumber @@ Entry entry_state)
+    ~callback:(fun number ->
         update_entries_indicator number;
         Lwt.return_unit
       )
-      ()
+    ()
 (* Sends request to get entries number and updates indicator *)
 
 let update_page () =
   Requests.send_generic_request
     ~request:(Requests.getEntries entry_state) 
     ~callback:(fun entries ->
-      (* White input *)
-      valid_input "search";
-      if not @@ Utils.empty_entries entries 
-      then begin
-        (* insert results *)
-        Insertion.insert_index entries;
-        (* update state *)
-        entry_state.last_id <- entry_state.last_id + 50;
-        enable_marker ();
-      end;
-      (* update number indicator *)
-      Lwt.async update_entries_number;
-      (* adjust footer *)
-      Headfoot.footerHandler ();
-      Lwt.return_unit
-    )
+        (* White input *)
+        valid_input "search";
+        if not @@ Utils.empty_entries entries 
+        then begin
+          (* insert results *)
+          Insertion.insert_index entries;
+          (* update state *)
+          entry_state.last_id <- entry_state.last_id + 50;
+          enable_marker ();
+        end;
+        (* update number indicator *)
+        Lwt.async update_entries_number;
+        (* adjust footer *)
+        Headfoot.footerHandler ();
+        Lwt.return_unit
+      )
     ~error:(fun err ->
-      begin
-        (* If occured error is Invalid_regex - color input to red *) 
-        match err with
-        | Invalid_regex -> 
-          invalid_input "search"
-        | _ -> ()
-      end;
-      (* Set entries indicator to 0 *)
-      update_entries_indicator "0";
-      Headfoot.footerHandler ();
-      Lwt.return_unit
-    )
+        begin
+          (* If occured error is Invalid_regex - color input to red *) 
+          match err with
+          | Invalid_regex -> 
+              invalid_input "search"
+          | _ -> ()
+        end;
+        (* Set entries indicator to 0 *)
+        update_entries_indicator "0";
+        Headfoot.footerHandler ();
+        Lwt.return_unit
+      )
     ()
 (** Sends request to get new range of entries according to [entry_state] and updates page. *)
 
@@ -176,43 +177,43 @@ let set_onclick_handlers () =
     Lwt.async (fun () -> set_start_letter ch);
     _false
   in
-    (* set handler for ALL *)
-    let a = get_element_by_id "all-letters" in 
-    a##.onclick := Html.handler (onclick_handler ".");
-    (* set handler for every letter from '0' to '9' *)
-    for index = 48 to 57 do
-      let ch = from_char_code index in
-      let id = "letter-" ^ ch in
-      match Opt.to_option @@ get_element_by_id_opt id with
-      | Some a -> a##.onclick := Html.handler (onclick_handler ch)
-      | None -> ()  
-    done;
-    (* set handler for every letter from 'a' to 'z' *)
-    for index = 97 to 122 do
-      let ch = from_char_code index in
-      let id = "letter-" ^ ch in
-      match Opt.to_option @@ get_element_by_id_opt id with
-      | Some a -> a##.onclick := Html.handler (onclick_handler ch)
-      | None -> () 
-    done
+  (* set handler for ALL *)
+  let a = get_element_by_id "all-letters" in 
+  a##.onclick := Html.handler (onclick_handler ".");
+  (* set handler for every letter from '0' to '9' *)
+  for index = 48 to 57 do
+    let ch = from_char_code index in
+    let id = "letter-" ^ ch in
+    match Opt.to_option @@ get_element_by_id_opt id with
+    | Some a -> a##.onclick := Html.handler (onclick_handler ch)
+    | None -> ()  
+  done;
+  (* set handler for every letter from 'a' to 'z' *)
+  for index = 97 to 122 do
+    let ch = from_char_code index in
+    let id = "letter-" ^ ch in
+    match Opt.to_option @@ get_element_by_id_opt id with
+    | Some a -> a##.onclick := Html.handler (onclick_handler ch)
+    | None -> () 
+  done
 (** Sets onclick handlers that will be called when user click on one of the letters from navigation bar *)
 
 let set_search_handler () = 
   let search = unopt @@ Html.CoerceTo.input @@ get_element_by_id "localsearch" in
   (* Handler called when keyup event is generated by search input *)
   search##.onkeyup := Html.handler (fun _ ->
-    (* Clear page *)
-    disable_marker ();
-    clear_page ();
-    (* State update *)
-    let re = search##.value in
-    let input = re##trim in
-    (* Encode pattern to make it possible to use it as path segement while making request to server *)
-    entry_state.pattern <- to_string input;
-    entry_state.last_id <- 0;
-    (* Update page *)
-    Lwt.async update_page;
-    _false)
+      (* Clear page *)
+      disable_marker ();
+      clear_page ();
+      (* State update *)
+      let re = search##.value in
+      let input = re##trim in
+      (* Encode pattern to make it possible to use it as path segement while making request to server *)
+      entry_state.pattern <- to_string input;
+      entry_state.last_id <- 0;
+      (* Update page *)
+      Lwt.async update_page;
+      _false)
 (** Sets onkeyup handler that will be called when user enters key in search input *)
 
 let initialise () =
@@ -221,21 +222,21 @@ let initialise () =
   Requests.send_generic_request
     ~request:(Requests.getEntries entry_state)
     ~callback:(fun entries ->
-      (* insert first entries *)
-      if not @@ Utils.empty_entries entries
-      then begin
         (* insert first entries *)
-        Insertion.insert_index entries;
-      end;  
-      (* update state *)
-      entry_state.last_id <- entry_state.last_id + 50;
-      enable_marker ();
-      (* update number indicator *)
-      Lwt.async update_entries_number;
-      (* Observe marker intersection *)
-      let selected_elt = unopt @@ document##querySelector (js "#load_div") in
-      observer##observe selected_elt;
-      Lwt.return_unit)
+        if not @@ Utils.empty_entries entries
+        then begin
+          (* insert first entries *)
+          Insertion.insert_index entries;
+        end;  
+        (* update state *)
+        entry_state.last_id <- entry_state.last_id + 50;
+        enable_marker ();
+        (* update number indicator *)
+        Lwt.async update_entries_number;
+        (* Observe marker intersection *)
+        let selected_elt = unopt @@ document##querySelector (js "#load_div") in
+        observer##observe selected_elt;
+        Lwt.return_unit)
     () 
 (* Initialises page with first request and introduices marker that will be observed by intersection observer. *)
 

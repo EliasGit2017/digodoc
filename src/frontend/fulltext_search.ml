@@ -33,6 +33,8 @@ type fulltext_search_state = {
 }
 (** State for fulltext search *)
 
+let my_timeout = ref None
+
 let state = {
   pattern = "";
   files = ML;
@@ -124,7 +126,6 @@ let preview_fulltext_source pattern regex case_sens loadmore =
               then 
                 begin
                   load_more_btn##.style##.display := js "none";
-                  res_ol##.innerHTML := js "";
                   Headfoot.footerHandler();
                 end
               else
@@ -239,35 +240,24 @@ let set_handlers () =
   (** Handler for the makefile checkbox . The user must select one type of files to perform fulltext search, ML by default.
       If changed, then a new request is sent to the API to retrieve the corresponding results. *)
 
-  fulltext_form##.onkeyup := Html.handler (fun kbevent ->
+  fulltext_form##.onkeyup := Html.handler (fun _ ->
       let cur_input_value = fulltext_form##.value##trim in
       let is_regex = to_bool @@ (get_input "fregex")##.checked in
       let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
-      let regex_inst = unopt @@ Html.CoerceTo.div @@ get_element_by_id "regex_instructions" in
+      (* let regex_inst = unopt @@ Html.CoerceTo.div @@ get_element_by_id "regex_instructions" in *)
 
       state.last_match_id <- 0;
 
-      let key_wait () =
-        match Option.map to_string @@ Optdef.to_option @@ kbevent##.key with
-        (* Do not send query if input is empty, or if user pressed escape or arrowkeys ... *)
-        | Some "Escape" ->
-            regex_inst##.style##.display := js "none";
-            ()
-        | Some "BackSpace" ->  
-            if cur_input_value = js ""
-            then ()
-        | Some "ArrowUp" -> ()
-        | Some "ArrowDown" -> ()
-        | Some "ArrowLeft" -> ()
-        | Some "ArrowRight" -> ()
-        | _ -> 
-            begin
-              logs "sending request ";
-              preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
-            end
+      let input_to_query () =
+        logs "sending request";
+        preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
       in
-
-      setTimeout (Js.wrap_callback (fun _ -> key_wait ())) 5000. |> ignore;
+      begin
+      match !my_timeout with
+      | Some timeout -> window##clearTimeout timeout
+      | _ -> ()
+      end;
+      my_timeout := Some (window##setTimeout (Js.wrap_callback (fun _ -> input_to_query ())) 200.);
       
       _false
     );

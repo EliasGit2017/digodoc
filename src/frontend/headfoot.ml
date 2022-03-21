@@ -11,7 +11,7 @@
 (**************************************************************************)
 
 open Globals
-
+open Js_of_ocaml
 (** Module [Headfoot] unions functions that manipulate header and footer of the page. *)
 
 (** {1 Header} *)
@@ -41,14 +41,21 @@ let activate_bar () =
 
 (** {1 Footer} *)
 
+let hider () =
+  let footer = get_element_by_id "footer" in
+  footer##.style##.opacity := js "0" |> Js.Optdef.return
+(** Hide footer *)
+
 let footerHandler () = 
   let footer = get_element_by_id "footer" in
   (* Footer is rendered after the last element. This is used to calculate correct client height *)
+  (* footer##.style##.opacity := js "0" |> Js.Optdef.return; *)
   footer##.style##.position := js "relative";
   let innerHeight = unoptdef @@ window##.innerHeight
   and clientHeight = document##.body##.clientHeight in
   (* If page height is bigger than window height *)
   if innerHeight <= clientHeight
   then footer##.style##.position := js "relative"
-  else footer##.style##.position := js "fixed"
+  else footer##.style##.position := js "fixed";
+  footer##.style##.opacity := js "1" |> Js.Optdef.return
 (** Handler that places footer correctly according to the page height *)

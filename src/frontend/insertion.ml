@@ -569,7 +569,7 @@ let insert_classes_search : classes_jsoo t -> unit =
        (* Append keyword 'class' *)
        let classl_word = Html.createSpan document in
        set_attr classl_word "class" (js "keyword");
-       
+
        if elt##.isclasstype > 0
        then append_inner classl_word (js "class type ")
        else append_inner classl_word (js "class ");
@@ -686,23 +686,23 @@ let insert_elements_search elements =
 
 (** ----------------------------------------------------------------------------------------------- *)
 
-let insert_modsUl_li : modules_jsoo t -> unit  = 
-  fun (modules : modules_jsoo t) ->
-  let modsUl = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "modsUl" in
-  let input = unopt @@ Html.CoerceTo.input @@ get_element_by_id "ftextmodules" in
-  let tag_container = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "mod_tag_container" in
-  (* Start by removing all children from packsUl and replace them with result of new request 
+(* let insert_modsUl_li : modules_jsoo t -> unit  = 
+   fun (modules : modules_jsoo t) ->
+   let modsUl = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "modsUl" in
+   let input = unopt @@ Html.CoerceTo.input @@ get_element_by_id "ftextmodules" in
+   let tag_container = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "mod_tag_container" in
+   (* Start by removing all children from packsUl and replace them with result of new request 
      modsUl##.innerHTML = ""; *)
-  let clean_lis = modsUl##.childNodes in
-  for i = 0 to clean_lis##.length - 1
-  do
+   let clean_lis = modsUl##.childNodes in
+   for i = 0 to clean_lis##.length - 1
+   do
     let li_i = unopt @@ Html.CoerceTo.element @@ unopt @@ (clean_lis##item i) in 
     Dom.removeChild modsUl li_i;
-  done;
+   done;
 
-  let cur_tags = ref StringSet.empty in
-  if to_bool tag_container##hasChildNodes
-  then
+   let cur_tags = ref StringSet.empty in
+   if to_bool tag_container##hasChildNodes
+   then
     begin
       let chosen_tags = tag_container##.childNodes in
       for i = 0 to chosen_tags##.length - 1
@@ -711,7 +711,7 @@ let insert_modsUl_li : modules_jsoo t -> unit  =
         cur_tags := StringSet.add (to_string (tag_li##.innerText)) !cur_tags;
       done
     end;
-  foreach
+   foreach
     (fun i elt ->
        if i < 10
        then begin
@@ -752,10 +752,86 @@ let insert_modsUl_li : modules_jsoo t -> unit  =
          Headfoot.footerHandler();
        end;
     )
+    modules *)
+(** preview modules propositions from which to choose *)
+
+let insert_modsUl_li : modules_jsoo t -> unit  = 
+  fun (modules : modules_jsoo t) ->
+  let modsUl = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "modsUl" in
+  let input = unopt @@ Html.CoerceTo.input @@ get_element_by_id "ftextmodules" in
+  let tag_container = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "mod_tag_container" in
+  (* Start by removing all children from packsUl and replace them with result of new request*) 
+  modsUl##.innerHTML := js "";
+
+  let cur_tags = ref StringSet.empty in
+  if to_bool tag_container##hasChildNodes
+  then
+    begin
+      let chosen_tags = tag_container##.childNodes in
+      for i = 0 to chosen_tags##.length - 1
+      do
+        let tag_li = unopt @@ Html.CoerceTo.element @@ unopt @@ (chosen_tags##item i) in
+        cur_tags := StringSet.add (to_string (tag_li##.innerText)) !cur_tags;
+      done
+    end;
+  (* logs "printing selected tags  ----> ";
+     StringSet.iter (fun e -> logs e) !cur_tags; *)
+  foreach
+    (fun i elt ->
+       if i < 10
+       then begin
+         let pack_li = Html.createLi document in
+         let pack_name = match String.index_opt (to_string elt##.opam) '.' with
+           | Some i -> String.sub (to_string elt##.opam) 0 i
+           | None -> to_string elt##.opam in
+         let name = to_string (concat elt##.name (js @@ ":" ^ pack_name)) in
+         pack_li##.onclick := Html.handler (fun _ ->
+             if (StringSet.mem name !cur_tags)
+             then Html.window##alert (js ("Error : package " ^ name ^ " already chosen,\nCheck for a different version"))
+             else 
+               begin
+                 cur_tags := StringSet.add name !cur_tags;
+                 let sp1 = Html.createSpan document in
+                 let sp2 = Html.createSpan document in
+                 sp1##.classList##add (js "tag"); 
+                 sp1##.innerText := js name;
+                 sp2##.classList##add (js "remove");
+                 sp2##.onclick := Html.handler (fun _ ->
+                     cur_tags := StringSet.remove name !cur_tags;
+                     Dom.removeChild (unopt @@ sp1##.parentNode) sp1;
+                     _false
+                   );
+                 let tag_container_li = Html.createLi document in
+                 Dom.appendChild sp1 sp2;
+                 Dom.appendChild tag_container_li sp1;
+                 Dom.appendChild tag_container tag_container_li;
+               end;
+             input##.value := js "";
+             modsUl##.style##.display := js "none";
+             Headfoot.footerHandler();
+             _false
+           );
+         let a_li = Html.createA document in
+         set_attr a_li "href" (js ("#"));
+         let in_w = Html.createSpan document in
+         set_attr in_w "style" (js "color:black");
+         in_w##.innerHTML := js " in ";
+         let pkg = Html.createSpan document in 
+         set_attr pkg "style" (js "color:green");
+         pkg##.innerHTML := js pack_name;
+         a_li##.innerHTML := elt##.name;
+         Dom.appendChild a_li in_w;
+         Dom.appendChild a_li pkg;
+         pack_li##.style##.display := js "block";
+         Dom.appendChild pack_li a_li;
+         Dom.appendChild modsUl pack_li;
+         Headfoot.footerHandler();
+       end;
+    )
     modules
 (** preview modules propositions from which to choose *)
 
-let insert_packsUl_li : packages_jsoo t -> unit  = 
+(* let insert_packsUl_li : packages_jsoo t -> unit  = 
   fun (packages : packages_jsoo t) ->
   let packsUl = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "packsUl" in
   let input = unopt @@ Html.CoerceTo.input @@ get_element_by_id "ftextpackages" in
@@ -809,7 +885,73 @@ let insert_packsUl_li : packages_jsoo t -> unit  =
            );
          let a_li = Html.createA document in
          set_attr a_li "href" (js ("#"));
+         set_attr a_li "style" (js "color:green");
          a_li##.innerText := js  name_version;
+         pack_li##.style##.display := js "block";
+         Dom.appendChild pack_li a_li;
+         Dom.appendChild packsUl pack_li;
+         Headfoot.footerHandler();
+       end;
+    )
+    packages *)
+(** preview packages propositions from which to choose *)
+
+let insert_packsUl_li : packages_jsoo t -> unit  = 
+  fun (packages : packages_jsoo t) ->
+  let packsUl = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "packsUl" in
+  let input = unopt @@ Html.CoerceTo.input @@ get_element_by_id "ftextpackages" in
+  let tag_container = unopt @@ Html.CoerceTo.ul @@ get_element_by_id "pack_tag_container" in
+  (* Start by removing all children from packsUl and replace them with result of new request 
+     packsUl##.innerHTML = "";*)
+  packsUl##.innerHTML := js "";
+
+  let cur_tags = ref StringSet.empty in
+  if to_bool tag_container##hasChildNodes
+  then
+    begin
+      let chosen_tags = tag_container##.childNodes in
+      for i = 0 to chosen_tags##.length - 1
+      do
+        let tag_li = unopt @@ Html.CoerceTo.element @@ unopt @@ (chosen_tags##item i) in
+        cur_tags := StringSet.add (to_string (tag_li##.innerText)) !cur_tags;
+      done
+    end;
+  foreach
+    (fun i elt ->
+       if i < 10
+       then begin
+         let pack_li = Html.createLi document in
+         let name = to_string elt##.name in 
+         pack_li##.onclick := Html.handler (fun _ ->
+             if (StringSet.mem name!cur_tags)
+             then Html.window##alert (js ("Error : package " ^ name ^ " already chosen,\nCheck for a different version"))
+             else 
+               begin
+                 cur_tags := StringSet.add name !cur_tags;
+                 let sp1 = Html.createSpan document in
+                 let sp2 = Html.createSpan document in
+                 sp1##.classList##add (js "tag"); 
+                 sp1##.innerText := js name;
+                 sp2##.classList##add (js "remove");
+                 sp2##.onclick := Html.handler (fun _ ->
+                     cur_tags := StringSet.remove name !cur_tags;
+                     Dom.removeChild (unopt @@ sp1##.parentNode) sp1;
+                     _false
+                   );
+                 let tag_container_li = Html.createLi document in
+                 Dom.appendChild sp1 sp2;
+                 Dom.appendChild tag_container_li sp1;
+                 Dom.appendChild tag_container tag_container_li;
+               end;
+             input##.value := js "";
+             packsUl##.style##.display := js "none";
+             Headfoot.footerHandler();
+             _false
+           );
+         let a_li = Html.createA document in
+         set_attr a_li "href" (js ("#"));
+         set_attr a_li "style" (js "color:green");
+         a_li##.innerText := js name;
          pack_li##.style##.display := js "block";
          Dom.appendChild pack_li a_li;
          Dom.appendChild packsUl pack_li;
