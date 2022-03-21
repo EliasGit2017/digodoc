@@ -161,6 +161,28 @@ let set_handlers () =
   let dune_switch = get_input "fcase_ftype_dune" in
   let mkfile_switch = get_input "fcase_ftype_makefile" in
   let load_more_btn = unopt @@ Html.CoerceTo.button @@ get_element_by_id "load_more" in
+  let regex_pattern_switch = get_input "fregex" in
+  let case_sens_switch = get_input "fcase_sens" in
+
+  regex_pattern_switch##.onchange := Html.handler ( fun _ ->
+      let cur_input_value = fulltext_form##.value##trim in
+      let is_regex = to_bool @@ (get_input "fregex")##.checked in
+      let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
+      state.last_match_id <- 0;
+      preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
+      _false
+    );
+  (** Send new request if regex/pattern is modified *)
+
+  case_sens_switch##.onchange := Html.handler ( fun _ ->
+      let cur_input_value = fulltext_form##.value##trim in
+      let is_regex = to_bool @@ (get_input "fregex")##.checked in
+      let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
+      state.last_match_id <- 0;
+      preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
+      _false
+    );
+  (** Send new request if case sensitivity is modified *)
 
   ml_switch##.onchange := Html.handler ( fun _ ->
       let cur_input_value = fulltext_form##.value##trim in
@@ -244,21 +266,22 @@ let set_handlers () =
       let cur_input_value = fulltext_form##.value##trim in
       let is_regex = to_bool @@ (get_input "fregex")##.checked in
       let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
-      (* let regex_inst = unopt @@ Html.CoerceTo.div @@ get_element_by_id "regex_instructions" in *)
-
+      
       state.last_match_id <- 0;
 
       let input_to_query () =
         logs "sending request";
         preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
       in
-      begin
-      match !my_timeout with
-      | Some timeout -> window##clearTimeout timeout
-      | _ -> ()
-      end;
-      my_timeout := Some (window##setTimeout (Js.wrap_callback (fun _ -> input_to_query ())) 200.);
       
+      begin
+        match !my_timeout with
+        | Some timeout -> window##clearTimeout timeout
+        | _ -> ()
+      end;
+      
+      my_timeout := Some (window##setTimeout (Js.wrap_callback (fun _ -> input_to_query ())) 200.);
+
       _false
     );
   (** Query search-api and display results 20 by 20 *)
