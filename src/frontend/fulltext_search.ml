@@ -34,6 +34,7 @@ type fulltext_search_state = {
 (** State for fulltext search *)
 
 let my_timeout = ref None
+(** timeout_id to delay request to search-api (ez_search in this case) *)
 
 let state = {
   pattern = "";
@@ -69,12 +70,6 @@ let append_inner elt str =
   elt##.innerHTML := concat elt##.innerHTML str
 (** [append_inner elt str] appends [str] to the content of [elt]. *)
 
-let setTimeout f time =
-  let interval_id = window##setTimeout f time in
-  (fun _ -> window##clearTimeout (interval_id))
-(** SetTimeout function to fully manage timeout : timeout [time] milliseconds on [f] function and clear 
-    Taken from OCP's TryOcaml source code, thanks to whoever wrote it ;-) *)
-
 let preview_fulltext_source pattern regex case_sens loadmore =
   let load_more_btn = unopt @@ Html.CoerceTo.button @@ get_element_by_id "load_more" in
   let result_div = unopt @@ Html.CoerceTo.div @@ get_element_by_id "result-div" in
@@ -104,6 +99,7 @@ let preview_fulltext_source pattern regex case_sens loadmore =
   handle_checkbox "fcase_ftype_ml" fulltext_info;
   handle_checkbox "fcase_ftype_dune" fulltext_info;
   handle_checkbox "fcase_ftype_makefile" fulltext_info;
+
   if not @@ ((to_string current_pattern##.value##trim) = "")
   then
     Lwt.async @@
@@ -266,20 +262,19 @@ let set_handlers () =
       let cur_input_value = fulltext_form##.value##trim in
       let is_regex = to_bool @@ (get_input "fregex")##.checked in
       let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
-      
+
       state.last_match_id <- 0;
 
       let input_to_query () =
-        logs "sending request";
         preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
       in
-      
+
       begin
         match !my_timeout with
         | Some timeout -> window##clearTimeout timeout
         | _ -> ()
       end;
-      
+
       my_timeout := Some (window##setTimeout (Js.wrap_callback (fun _ -> input_to_query ())) 200.);
 
       _false
@@ -351,3 +346,4 @@ let onload () =
   set_handlers ();
   uninitialized_page ()
 (* Onload handler for fulltext search page *)
+

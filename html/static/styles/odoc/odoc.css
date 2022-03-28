@@ -1912,3 +1912,10 @@ input[type="checkbox"]:checked~input {
     padding-left: calc(7.5 * var(--size-line));
   }
 }
+
+@media only screen and (max-width: 1100px) {
+  .topnav-right{
+    margin-left: 35%;
+    float: none;
+  }
+}

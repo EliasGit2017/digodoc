@@ -11,17 +11,19 @@
             <label for="fpattern_fulltext">Search pattern:</label>
             <input type="text" class="fpattern" id="fpattern_fulltext" name="fpattern_fulltext" value="" autocomplete="off"><br>
             <div id="regex_instructions">
-              <div> <code>x|y</code> match x or y </div>
-              <div> <code>x+</code> match x one or more times </div>
-              <div> <code>x*</code> match x 0 or more times </div>
-              <div> <code>x?</code> Optionally match x </div>
-              <div> <code>\.</code> match any single char </div>
-              <div> <code>(x)</code> group pattern <code>type\( nonrec\)? example</code> </div>
-              <div> <code>w</code> alphanumeric character shortcut</div>
-              <div> <code>[aA]</code> ranges \[a-z\] to match a character from a set </div>
+              <div> <code>&nbsp;.&nbsp;</code> matches any character </div>
+              <div> <code>&nbsp;*&nbsp;</code> matches the preceding expression 0, one or multiple times </div>
+              <div> <code>&nbsp;+&nbsp;</code> matches the preceding expression one or multiple times </div>
+              <div> <code>&nbsp;?&nbsp;</code> Matches the preceding expression once or not at all </div>
+              <div> <code>&nbsp;^&nbsp;</code> matches at the beginning of line </div>
+              <div> <code>&nbsp;$&nbsp;</code> matches at end of line </div>
+              <div> <code>&nbsp;\|&nbsp;</code> alternative between two expressions </div>
+              <div> <code>&nbsp;\&nbsp;</code> quotes special characters previously described </div>
+              <div> <code>&nbsp;[a-z], [0-9]&nbsp;</code> ranges \[a-z\] (or \[0-9\]) to match a character from a set </div>
+              <div> For further Regex commands can be found <a href="https://ocaml.org/api/Str.html" target="_blank"> here </a></div>
             </div>
           </td>
-        </tr>
+        <tr>
         <tr><td>Search in : </td></tr>
         <tr>
           <td>

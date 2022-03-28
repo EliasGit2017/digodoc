@@ -703,8 +703,7 @@ let insert_modsUl_li : modules_jsoo t -> unit  =
         cur_tags := StringSet.add (to_string (tag_li##.innerText)) !cur_tags;
       done
     end;
-  (* logs "printing selected tags  ----> ";
-     StringSet.iter (fun e -> logs e) !cur_tags; *)
+    
   foreach
     (fun i elt ->
        if i < 10
@@ -929,4 +928,3 @@ let insert_Fulltext_Sources : sources_search_result_jsoo t -> bool -> unit =
   Headfoot.footerHandler ();
   (** Inserts the result of fulltext search given by ez_search and displays the load more button if [load_more] is
       set to true *)
-      
