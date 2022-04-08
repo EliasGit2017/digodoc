@@ -137,6 +137,7 @@
     height          : 50px;
     margin-top      : 30px;
     border-top      : 1px solid grey;
+    opacity         : 0;
   }
 
   .container {
@@ -411,9 +412,8 @@
   /* Highlight line number in sourcers after being redirected from fulltext_search.html page*/
   :target {
     background-color  : orange;
-    transition: background-color 1s linear;
+    transition        : background-color 1s linear;
     -webkit-transition: background-color 1s linear;
-    -moz-transition: background-color 1s linear;
-    -o-transition: background-color 1s linear;
+    -moz-transition   : background-color 1s linear;
+    -o-transition     : background-color 1s linear;
   }
-  

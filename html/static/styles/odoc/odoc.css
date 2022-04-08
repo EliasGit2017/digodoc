@@ -377,9 +377,9 @@ a.digodoc-lib {
 /* Linked highlight */
   {
   /* background-color: var(--color-bg-highlight); */
-  border-radius   : 5px;
-  background: linear-gradient(0.25turn, #659CD6, 5%, #F6F6F6);
-  border: none;
+  border-radius: 5px;
+  background   : linear-gradient(0.25turn, #659CD6, 5%, #F6F6F6);
+  border       : none;
 }
 
 .xref-unresolved {
@@ -513,9 +513,9 @@ dt.spec {
 }
 
 dt.spec:target {
-  border-radius   : 5px;
-  background: linear-gradient(0.25turn, #cfdceb, 5%, #e5e5e5);
-  border: none;
+  border-radius: 5px;
+  background   : linear-gradient(0.25turn, #cfdceb, 5%, #e5e5e5);
+  border       : none;
 }
 
 td.field>a.anchor,
@@ -594,9 +594,9 @@ pre span
 }
 
 pre code {
-  font-size       : inherit;
-  color           : white;
-  background-color: #000000;
+  font-size          : inherit;
+  color              : white;
+  background-color   : #000000;
   /* padding-left    : 10px; */
 }
 
@@ -956,6 +956,7 @@ input#search {
   font-family     : -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
   min-height      : 50px;
   box-shadow      : none;
+  opacity         : 0;
 }
 
 #footer table {
@@ -1909,5 +1910,12 @@ input[type="checkbox"]:checked~input {
   /*Put table of content at the level of letter selection*/
   .content {
     padding-left: calc(7.5 * var(--size-line));
+  }
+}
+
+@media only screen and (max-width: 1100px) {
+  .topnav-right{
+    margin-left: 35%;
+    float: none;
   }
 }

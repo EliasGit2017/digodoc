@@ -33,6 +33,9 @@ type fulltext_search_state = {
 }
 (** State for fulltext search *)
 
+let my_timeout = ref None
+(** timeout_id to delay request to search-api (ez_search in this case) *)
+
 let state = {
   pattern = "";
   files = ML;
@@ -96,6 +99,7 @@ let preview_fulltext_source pattern regex case_sens loadmore =
   handle_checkbox "fcase_ftype_ml" fulltext_info;
   handle_checkbox "fcase_ftype_dune" fulltext_info;
   handle_checkbox "fcase_ftype_makefile" fulltext_info;
+
   if not @@ ((to_string current_pattern##.value##trim) = "")
   then
     Lwt.async @@
@@ -153,6 +157,28 @@ let set_handlers () =
   let dune_switch = get_input "fcase_ftype_dune" in
   let mkfile_switch = get_input "fcase_ftype_makefile" in
   let load_more_btn = unopt @@ Html.CoerceTo.button @@ get_element_by_id "load_more" in
+  let regex_pattern_switch = get_input "fregex" in
+  let case_sens_switch = get_input "fcase_sens" in
+
+  regex_pattern_switch##.onchange := Html.handler ( fun _ ->
+      let cur_input_value = fulltext_form##.value##trim in
+      let is_regex = to_bool @@ (get_input "fregex")##.checked in
+      let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
+      state.last_match_id <- 0;
+      preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
+      _false
+    );
+  (** Send new request if regex/pattern is modified *)
+
+  case_sens_switch##.onchange := Html.handler ( fun _ ->
+      let cur_input_value = fulltext_form##.value##trim in
+      let is_regex = to_bool @@ (get_input "fregex")##.checked in
+      let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
+      state.last_match_id <- 0;
+      preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
+      _false
+    );
+  (** Send new request if case sensitivity is modified *)
 
   ml_switch##.onchange := Html.handler ( fun _ ->
       let cur_input_value = fulltext_form##.value##trim in
@@ -232,44 +258,28 @@ let set_handlers () =
   (** Handler for the makefile checkbox . The user must select one type of files to perform fulltext search, ML by default.
       If changed, then a new request is sent to the API to retrieve the corresponding results. *)
 
-  (* match Option.map to_string @@ Optdef.to_option @@ kbevent##.key with
-          (* Do not send query if input is empty, or if user pressed escape or arrowkeys ... *)
-          | Some "Escape" ->
-              regex_inst##.style##.display := js "none";
-              ()
-          | Some "BackSpace" ->  
-              if cur_input_value = js ""
-              then ()
-          | Some "ArrowUp" -> ()
-          | Some "ArrowDown" -> ()
-          | Some "ArrowLeft" -> ()
-          | Some "ArrowRight" -> ()
-          | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens false; *)
-
-  fulltext_form##.onkeyup := Html.handler (fun kbevent ->
+  fulltext_form##.onkeyup := Html.handler (fun _ ->
       let cur_input_value = fulltext_form##.value##trim in
       let is_regex = to_bool @@ (get_input "fregex")##.checked in
       let case_sens = to_bool @@ (get_input "fcase_sens")##.checked in
-      let regex_inst = unopt @@ Html.CoerceTo.div @@ get_element_by_id "regex_instructions" in
+
       state.last_match_id <- 0;
+
+      let input_to_query () =
+        preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
+      in
+
       begin
-        match Option.map to_string @@ Optdef.to_option @@ kbevent##.key with
-        (* Do not send query if input is empty, or if user pressed escape or arrowkeys ... *)
-        | Some "Escape" ->
-            regex_inst##.style##.display := js "none";
-            ()
-        | Some "BackSpace" ->  
-            if cur_input_value = js ""
-            then ()
-        | Some "ArrowUp" -> ()
-        | Some "ArrowDown" -> ()
-        | Some "ArrowLeft" -> ()
-        | Some "ArrowRight" -> ()
-        | _ -> preview_fulltext_source (to_string cur_input_value) is_regex case_sens false;
+        match !my_timeout with
+        | Some timeout -> window##clearTimeout timeout
+        | _ -> ()
       end;
+
+      my_timeout := Some (window##setTimeout (Js.wrap_callback (fun _ -> input_to_query ())) 200.);
+
       _false
     );
-  (** Query search-api and display result 20 by 20 *)
+  (** Query search-api and display results 20 by 20 *)
 
   fulltext_form##.onpointerenter := Html.handler (fun _ ->
       let time = 800. in
@@ -336,3 +346,4 @@ let onload () =
   set_handlers ();
   uninitialized_page ()
 (* Onload handler for fulltext search page *)
+
