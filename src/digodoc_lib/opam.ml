@@ -10,7 +10,7 @@
 (**************************************************************************)
 
 open Ez_opam_file.V1
-open EzFile.OP
+open Ez_file.FileString.OP
 open EzCompat
 open OpamParserTypes.FullPos
 open Type

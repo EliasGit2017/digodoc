@@ -10,8 +10,8 @@
 (*                                                                        *)
 (**************************************************************************)
 
-
-open EzFile.OP
+open Ez_file
+open Ez_file.FileString.OP
 open Globals
 
 let get_script () = match !frontend with 
@@ -21,8 +21,8 @@ let get_script () = match !frontend with
 
 let file_content filename =
   match Sys.getenv "DIGODOC_CONFIG" with
-  | dir when EzFile.exists (dir // filename) -> 
-    EzFile.read_file (dir // filename)
+  | dir when FileString.exists (dir // filename) -> 
+    FileString.read_file (dir // filename)
   | exception Not_found | _ ->
     begin   
       match Files.read filename with

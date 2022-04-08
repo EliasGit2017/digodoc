@@ -8,8 +8,8 @@
 (*  described in the LICENSE.md file in the root directory.               *)
 (*                                                                        *)
 (**************************************************************************)
-
-open EzFile.OP
+open Ez_file
+open Ez_file.FileString.OP
 open EzCompat
 open Digodoc_common
 
@@ -58,7 +58,7 @@ end
 module SAVE = struct
 
   let open_out filename =
-    EzFile.make_dir ~p:true ( Filename.dirname filename );
+    FileString.make_dir ~p:true ( Filename.dirname filename );
     open_out filename
 
   open Type
@@ -195,7 +195,7 @@ let library_of_string s =
   { lib_name ; lib_opam_name ; lib_opam_version }
 
 let read_entry file =
-  match EzFile.read_lines_to_list file with
+  match FileString.read_lines_to_list file with
   |
     "opam" ::
     opam_name ::

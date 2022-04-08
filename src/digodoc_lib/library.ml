@@ -11,7 +11,7 @@
 
 open EzCompat
 open Type
-open EzFile.OP
+open Ez_file.FileString.OP
 
 let long_name ~lib_opam ~lib_name =
   lib_opam.opam_name ^ "::" ^ lib_name

@@ -1,5 +1,5 @@
 open Soup
-
+open Ez_file
 
 (* arguments must be valid html, header and footer will be inserted,
    respectively, at the top and bottom of the body *)
@@ -65,7 +65,7 @@ let change_link_to_upper_directory html upper =
     children body
   in
   let link = get_first_elt div |> get_first_elt |> get_first_elt in
-  let href = EzFile.dirname (Option.get @@ attribute "href" link) ^ "/" ^ upper in
+  let href = FileString.dirname (Option.get @@ attribute "href" link) ^ "/" ^ upper in
   let new_href =
     match upper with
     | "modules.html" -> "../../" ^ href

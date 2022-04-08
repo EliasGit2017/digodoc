@@ -54,6 +54,6 @@ let call_stdout args =
   let oc = open_out stdout in
   call ~stdout:(Unix.descr_of_out_channel oc) args ;
   close_out oc;
-  let lines = EzFile.read_lines stdout in
+  let lines = Ez_file.FileString.read_lines stdout in
   Sys.remove stdout;
   lines

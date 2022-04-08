@@ -14,7 +14,8 @@ open Ez_html.V1
 open Ez_subst.V1
 open Ezcmd.V2
 (* open EZCMD.TYPES *)
-open EzFile.OP
+open Ez_file.FileString.OP
+open Ez_file
 open Digodoc_common
 open Digodoc_common.Globals
 open Digodoc_common.Utils
@@ -108,8 +109,8 @@ let generate_page ~brace destdir =
   footerref:= Some (EZ_SUBST.string (file_content "footer.html") ~ctxt ~brace);
   let page = EZ_SUBST.string (file_content "canvas.html") ~ctxt ~brace in
 
-  EzFile.make_dir ~p:true destdir;
-  EzFile.write_file ( destdir // "index.html" )
+  FileString.make_dir ~p:true destdir;
+  FileString.write_file ( destdir // "index.html" )
     ( Printf.sprintf "%s" page );
   ()
 
@@ -136,7 +137,7 @@ let title_info path =
   let path_html =
     String.concat "/"
       (List.map (fun _s -> "..") path)
-  and opam_name,opam_version = EzFile.cut_extension (List.hd path) in
+  and opam_name,opam_version = FileString.cut_extension (List.hd path) in
   let pkg_link =      
     Printf.sprintf {| <a class="digodoc-opam" href="%s/../docs/%s/index.html">package</a>|}
       path_html
@@ -152,13 +153,13 @@ let htmlize_file destdir srcdir path file =
   let destdir = destdir // (escape_file file) in
   let rawdir = destdir // "raw" in
   let content = try
-      EzFile.read_file srcfile
+      FileString.read_file srcfile
     with exn ->
       Printf.kprintf failwith "EzFile.read_file('%s'): %s"
         srcfile ( Printexc.to_string exn)
   in
-  EzFile.make_dir ~p:true rawdir;
-  EzFile.write_file ( rawdir // file ) content ;
+  FileString.make_dir ~p:true rawdir;
+  FileString.write_file ( rawdir // file ) content ;
 
   let rec brace () var = match var with
     | "content" -> htmlize file content
@@ -357,7 +358,7 @@ let htmlize_dir destdir dir =
   htmlize_dir destdir dirname [] basename
 
 let htmlize target_dir dirs =
-  EzFile.make_dir ~p:true target_dir;
+  FileString.make_dir ~p:true target_dir;
 
   List.iter (htmlize_dir target_dir) dirs;
   ()

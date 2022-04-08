@@ -11,7 +11,7 @@
 
 open EzCompat
 open Type
-open EzFile.OP
+open Ez_file.FileString.OP
 
 (* Assumption: all modules in the same directory are added by the
    same opam_file *)

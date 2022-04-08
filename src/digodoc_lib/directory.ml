@@ -10,7 +10,7 @@
 (**************************************************************************)
 
 open EzCompat
-open EzFile.OP
+open Ez_file.FileString.OP
 open Type
 
 open Meta_file.Types

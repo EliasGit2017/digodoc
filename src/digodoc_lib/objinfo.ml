@@ -11,7 +11,7 @@
 
 open EzCompat
 open Type
-open EzFile.OP
+open Ez_file.FileString.OP
 
 let read state filename =
   let filename = state.opam_switch_prefix // filename in

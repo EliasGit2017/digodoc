@@ -11,7 +11,8 @@
 
 open Ez_html.V1
 open EzCompat
-open EzFile.OP
+open Ez_file
+open Ez_file.FileString.OP
 open Type
 open Digodoc_common
 
@@ -517,14 +518,14 @@ let infos_of_opam state pkg opam =
 
   let omd_generate_file file =
     let basename = Filename.basename file in
-    let name,_ = EzFile.cut_extension basename in
+    let name,_ = FileString.cut_extension basename in
     let html_file = ("docs" // pkg // name ^ ".html") in
     let srcfile = ( state.opam_switch_prefix // file ) in
     if Sys.file_exists srcfile then begin
-      EzFile.make_dir ~p:true html_dir ;
+      FileString.make_dir ~p:true html_dir ;
       let generate bb ~title =
         ignore title;
-        let content = try EzFile.read_file srcfile |> Omd.of_string |> Omd.to_html with _ -> "" in
+        let content = try FileString.read_file srcfile |> Omd.of_string |> Omd.to_html with _ -> "" in
         Printf.bprintf bb {|%s|} content 
       in
       Html.generate_page
@@ -600,8 +601,8 @@ let infos_of_opam state pkg opam =
 let save_line ~dir_name ~line_name line =
 
   let mdl_dir = Globals.digodoc_html_dir // dir_name in
-  EzFile.make_dir ~p:true mdl_dir;
-  EzFile.write_file ( mdl_dir // line_name )
+  FileString.make_dir ~p:true mdl_dir;
+  FileString.write_file ( mdl_dir // line_name )
     line;
   ()
 
@@ -717,8 +718,8 @@ let generate_library_pages state =
         let mld_file = digodoc_odoc_dir // pkg // "page-index.mld" in
 
         let dirname = Filename.dirname mld_file in
-        EzFile.make_dir ~p:true dirname ;
-        EzFile.write_file mld_file content;
+        FileString.make_dir ~p:true dirname ;
+        FileString.write_file mld_file content;
 
         let odoc_target = digodoc_odoc_dir // pkg //  "page-index.odoc" in
         let cmd = [
@@ -851,7 +852,7 @@ let generate_opam_pages ~continue_on_error state =
         Printf.bprintf b "{1:info Package info}\n";
 
         let dir = digodoc_odoc_dir // pkg in
-        EzFile.make_dir ~p:true dir;
+        FileString.make_dir ~p:true dir;
 
 
         let infos = infos_of_opam state pkg opam in
@@ -884,7 +885,7 @@ let generate_opam_pages ~continue_on_error state =
         let content = Buffer.contents b in
         let mld_file = dir // "page-index.mld" in
 
-        EzFile.write_file mld_file content;
+        FileString.write_file mld_file content;
 
         let odoc_target = digodoc_odoc_dir // pkg //  "page-index.odoc" in
         let cmd = [
@@ -1052,8 +1053,8 @@ let generate_meta_pages state =
         let mld_file = digodoc_odoc_dir // pkg // "page-index.mld" in
 
         let dirname = Filename.dirname mld_file in
-        EzFile.make_dir ~p:true dirname ;
-        EzFile.write_file mld_file content;
+        FileString.make_dir ~p:true dirname ;
+        FileString.write_file mld_file content;
 
         let odoc_target = digodoc_odoc_dir // pkg //  "page-index.odoc" in
         let cmd = [
@@ -1100,9 +1101,9 @@ let generate_meta_pages state =
 let generate ~state ~continue_on_error  =
   (* Iter on modules first *)
   if Sys.file_exists Globals.digodoc_html_dir then begin
-    EzFile.remove_dir ~all:true Globals.digodoc_html_dir
+    FileString.remove_dir ~all:true Globals.digodoc_html_dir
   end;
-  EzFile.make_dir ~p:true Globals.digodoc_html_dir;
+  FileString.make_dir ~p:true Globals.digodoc_html_dir;
   (* STOPED HERE *)
   Process.call [|
     "rsync"; "-auv"; "html/.";  Globals.digodoc_dir // "." |];
@@ -1137,7 +1138,7 @@ let generate ~state ~continue_on_error  =
 
   if !Globals.sources then begin
     Globals.with_header := true;
-    EzFile.make_dir ~p:true sources_dir;
+    FileString.make_dir ~p:true sources_dir;
     StringMap.iter (fun _ opam ->
       let opam_sources = sources_of_opam opam
       and opam_htmlize_sources = htmlize_sources_of_opam opam in

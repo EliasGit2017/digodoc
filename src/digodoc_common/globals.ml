@@ -10,7 +10,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
-open EzFile.OP
+open Ez_file.FileString.OP
 
 let digodoc_dir = "_digodoc"
 

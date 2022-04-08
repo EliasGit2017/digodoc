@@ -11,7 +11,8 @@
 
 open Ez_html.V1
 open Ez_subst.V1
-open EzFile.OP
+open Ez_file
+open Ez_file.FileString.OP
 open Digodoc_common
 open Globals
 open Utils
@@ -19,7 +20,7 @@ open Utils
 (* generate page _digodoc/docs/${filename} *)
 let generate_page ~filename ~title ~is_index f =
 
-  let dirname = EzFile.dirname filename in
+  let dirname = FileString.dirname filename in
   let path_list =
     if String.contains filename '/'
     then
@@ -84,12 +85,12 @@ let generate_page ~filename ~title ~is_index f =
     |} footer;
 
   let contents = Buffer.contents bb in
-  EzFile.write_file (digodoc_dir // filename) contents;
+  FileString.write_file (digodoc_dir // filename) contents;
   ()
 
 let encode = HTML.encode
 
-open EzFile.OP
+open FileString.OP
 open HTML.TYPES
 
 let check_html ~file xml =
@@ -159,7 +160,7 @@ let iter_html ?(check_links=false) ?(add_trailer=false) dir =
   Printf.eprintf "Scanning html files...\n%!";
   assert ( check_links ||  add_trailer );
   (*  EzFile.make_select *)
-  EzFile.make_select EzFile.iter_dir ~deep:true ~glob:"*.html"
+  FileString.make_select FileString.iter_dir ~deep:true ~glob:"*.html"
     ~f:(fun path ->
         let file = dir // path in
         match
@@ -174,13 +175,13 @@ let iter_html ?(check_links=false) ?(add_trailer=false) dir =
         | Some xml ->
             if check_links then check_html ~file xml;
             if add_trailer then
-              EzFile.write_file file
+              FileString.write_file file
                 ( "<!DOCTYPE html>\n" ^ HTML.to_string ( insert_trailer xml ) )
       ) dir;
   Printf.eprintf "Scan finished.\n%!"
 
 let write_file file ~content =
-  EzFile.write_file file (HTML.check content)
+  FileString.write_file file (HTML.check content)
 
 let add_header_footer () =
   Printf.eprintf "Adding header and footer...\n%!";
@@ -190,16 +191,16 @@ let add_header_footer () =
                         type="application/javascript" 
                         src="${root}static/scripts/%s">
                         </script>|} (get_script ()))] in
-  EzFile.make_select EzFile.iter_dir ~deep:true ~glob:"index.html"
+  FileString.make_select FileString.iter_dir ~deep:true ~glob:"index.html"
     ~f:(fun path ->
-        if EzString.starts_with ~prefix:"ENTRY" (EzFile.basename path) 
+        if EzString.starts_with ~prefix:"ENTRY" (FileString.basename path) 
         then ()
         else begin
           let file = html_dir // path in
           let rec brace () var = 
             match var with
             | "root" ->
-                let dirname = EzFile.dirname path in 
+                let dirname = FileString.dirname path in 
                 let path_list = 
                   if String.contains path '/'   
                   then 
@@ -228,32 +229,32 @@ let add_header_footer () =
                 Printf.kprintf failwith "Unknown var %S" var
           in
 
-          let html = EzFile.read_file file 
+          let html = FileString.read_file file 
           and header = EZ_SUBST.string (file_content "header.html") ~brace ~ctxt:()
           and footer = EZ_SUBST.string (file_content "footer.html") ~brace ~ctxt:()
           and head_childs = List.map (fun (id,child) -> id, EZ_SUBST.string child ~brace ~ctxt:()) head_childs in
 
           let html' = Patchtml.edit_html ~header ~footer ~head_childs html in
 
-          EzFile.remove file;
+          FileString.remove file;
 
-          EzFile.write_file file html'
+          FileString.write_file file html'
         end
       ) html_dir
 
 let adjust_nav () =
   let update_doc path ?(filename="index.html") upper = 
     let file = path // filename in
-    let html = EzFile.read_file file in
+    let html = FileString.read_file file in
     let html' = Patchtml.change_link_to_upper_directory html upper in 
-    EzFile.remove file;
-    EzFile.write_file file html'
+    FileString.remove file;
+    FileString.write_file file html'
   and add_search_input path = 
     let file = path // "index.html" in
-    let html = EzFile.read_file file in
+    let html = FileString.read_file file in
     let html' = Patchtml.append_local_search html in
-    EzFile.remove file;
-    EzFile.write_file file html'
+    FileString.remove file;
+    FileString.write_file file html'
   in
     let html_dir = digodoc_html_dir in 
     Array.iter (fun file ->
@@ -263,24 +264,24 @@ let adjust_nav () =
         | "MODULE" -> begin
           Array.iter (fun modul ->
               let path = path // modul in 
-              if EzFile.is_directory path then begin
+              if FileString.is_directory path then begin
                 update_doc path "modules.html";
               end
             ) 
-            (EzFile.read_dir path)
+            (FileString.read_dir path)
         end
         | "LIBRARY" -> update_doc path "libraries.html";
         | "META" -> update_doc path "metas.html"
         | "PAGES" ->
-          if EzFile.exists (path // "index.html")
+          if FileString.exists (path // "index.html")
           then update_doc path "packages.html"
-          else update_doc path "packages.html" ~filename:(EzFile.readdir path).(0)
+          else update_doc path "packages.html" ~filename:(FileString.readdir path).(0)
         | "OPAM" -> 
           add_search_input path;
           update_doc path "packages.html"
         | _ -> ()
       )
-      (EzFile.read_dir html_dir)
+      (FileString.read_dir html_dir)
 
 
 
@@ -288,12 +289,12 @@ let adjust_docs () =
   Printf.eprintf "Docs adjusting...\n%!";
   let html_dir = digodoc_html_dir in
   adjust_nav ();
-  EzFile.make_select EzFile.iter_dir ~deep:true ~glob:"index.html"
+  FileString.make_select FileString.iter_dir ~deep:true ~glob:"index.html"
     ~f:(fun path ->
         let file = html_dir // path in
-        let html = EzFile.read_file file in
+        let html = FileString.read_file file in
         let html' = Patchtml.change_link_highlight html in 
-        EzFile.remove file;
-        EzFile.write_file file html'
+        FileString.remove file;
+        FileString.write_file file html'
       )
     html_dir

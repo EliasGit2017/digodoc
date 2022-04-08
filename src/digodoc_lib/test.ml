@@ -41,9 +41,10 @@ let about_page =
 
 (* Emulation of doc generation. To use only to check html style / scripts *)
 let generate () =
-    if EzFile.exists "examples" then 
-        EzFile.remove_dir ~all:true "examples";
-    EzFile.make_dir ~p:true "examples/sources";
+    let open Ez_file in 
+    if FileString.exists "examples" then 
+        FileString.remove_dir ~all:true "examples";
+    FileString.make_dir ~p:true "examples/sources";
 
     (* page example for docs: about.html *)
     Process.call [|"rsync"; "-auv"; "html/.";  "examples/." |];
@@ -54,7 +55,7 @@ let generate () =
         | _ -> ""
     in
     let about_html = Ez_subst.V1.EZ_SUBST.string about_page ~brace ~ctxt:() in
-    EzFile.write_file "examples/about.html" about_html;
+    FileString.write_file "examples/about.html" about_html;
 
   (* pages examples for sources: config folder *)
   Htmlize.Main.htmlize "examples/sources/" ["config/"];

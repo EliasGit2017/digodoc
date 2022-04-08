@@ -23,7 +23,8 @@
 *)
 
 open EzCompat
-open EzFile.OP
+open Ez_file
+open Ez_file.FileString.OP
 open Type
 open Ezcmd.V2
 open Digodoc_common.Globals
@@ -60,7 +61,7 @@ let main () =
         in
         let state = Compute.compute ~opam_switch_prefix ~objinfo () in
         if objinfo then begin
-          EzFile.make_dir ~p:true "_digodoc";
+          FileString.make_dir ~p:true "_digodoc";
           let oc = open_out_bin cache_file in
           output_value oc ( state : state );
           close_out oc;
