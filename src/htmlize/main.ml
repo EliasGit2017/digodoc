@@ -17,7 +17,6 @@ open Ezcmd.V2
 open Ez_file.FileString.OP
 open Ez_file
 open Digodoc_common
-open Digodoc_common.Globals
 open Digodoc_common.Utils
 
 
@@ -166,12 +165,7 @@ let htmlize_file destdir srcdir path file =
     | "content-info" -> content_info content
     | "title" -> String.concat "/" path
     | "title-info" -> title_info path
-    | "script" ->
-        let script = match !frontend with
-          | JS_OCAML -> "frontend.js"
-          | _ -> "script_sources.js"
-        in
-          Printf.sprintf "%sstatic/scripts/%s" (brace () "root") script 
+    | "script" -> Printf.sprintf "%sstatic/scripts/frontend.js" (brace () "root") 
     | "root" ->
         let s =
           String.concat "/"
@@ -303,12 +297,7 @@ let rec htmlize_dir destdir srcdir path basename =
     | "content-info" -> dir_info files
     | "title" -> String.concat "/" path
     | "title-info" -> title_info path
-    | "script" ->
-        let script = match !frontend with
-          | JS_OCAML -> "frontend.js"
-          | _ -> "script_sources.js"
-        in
-          Printf.sprintf "%sstatic/scripts/%s" (brace () "root") script 
+    | "script" -> Printf.sprintf "%sstatic/scripts/frontend.js" (brace () "root") 
     | "root" ->
         let s =
           String.concat "/"

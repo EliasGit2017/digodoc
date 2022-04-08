@@ -64,7 +64,7 @@ let generate_page ~filename ~title ~is_index f =
         <title>%s</title>
         <link rel="stylesheet" href="%sstatic/styles/odoc/odoc.css"/>
         <link rel="icon" href="%sstatic/imgs/favicon.png" />
-        <script type="text/javascript" src="%sstatic/scripts/%s" charset="utf-8"></script>
+        <script type="text/javascript" src="%sstatic/scripts/frontend.js" charset="utf-8"></script>
         <meta charset="utf-8"/>
         <meta name="generator" content="digodoc 0.1"/>
         <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
@@ -72,7 +72,7 @@ let generate_page ~filename ~title ~is_index f =
         <script>hljs.initHighlightingOnLoad();</script>
       </head>
       <body>
-    |} title root root root (get_script ()) root;
+    |} title root root root root;
   Printf.bprintf bb
     {|%s 
     <div class="content">
@@ -189,8 +189,8 @@ let add_header_footer () =
   let head_childs = [("link", {|<link rel="icon" href="${root}static/imgs/favicon.png" />|});
                      ("script", Printf.sprintf {|<script defer="defer" 
                         type="application/javascript" 
-                        src="${root}static/scripts/%s">
-                        </script>|} (get_script ()))] in
+                        src="${root}static/scripts/frontend.js">
+                        </script>|}) ] in
   FileString.make_select FileString.iter_dir ~deep:true ~glob:"index.html"
     ~f:(fun path ->
         if EzString.starts_with ~prefix:"ENTRY" (FileString.basename path) 

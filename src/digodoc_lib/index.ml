@@ -265,11 +265,9 @@ let print_index bb index entity_name =
       </h3>
       <ol id="packages-%s" class="packages">
 |} i i i i i;
-      if !Globals.frontend = Globals.JS then begin
-        List.iter (fun ( _entry, line ) ->
-            Printf.bprintf bb "%s\n" line;
-          ) ( List.sort compare !r )
-      end;
+      List.iter (fun ( _entry, line ) ->
+          Printf.bprintf bb "%s\n" line;
+        ) ( List.sort compare !r );
       Printf.bprintf bb {|
       </ol>
      </div>

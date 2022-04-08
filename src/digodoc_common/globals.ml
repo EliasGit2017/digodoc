@@ -22,10 +22,6 @@ let db_update_index = ref false
 
 let sources_update_index = ref false
 
-type frontentd_type = JS | JS_API | JS_OCAML
-
-let frontend = ref JS 
-
 (* options that are modified only using digodoc *)
 let sources = ref true
 

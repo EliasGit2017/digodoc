@@ -12,12 +12,6 @@
 
 open Ez_file
 open Ez_file.FileString.OP
-open Globals
-
-let get_script () = match !frontend with 
-  | JS -> "search.js"
-  | JS_API -> "search_api.js"
-  | JS_OCAML -> "frontend.js"
 
 let file_content filename =
   match Sys.getenv "DIGODOC_CONFIG" with

@@ -74,12 +74,6 @@ let main () =
         match !action with
         | None -> action := Some a
         | Some _ -> failwith "Duplicate actions"
-  and set_frontend_type arg =
-    let ft = match arg with
-      | "js-api" -> JS_API
-      | "js-ocaml" -> JS_OCAML
-      | _ -> JS
-    in frontend := ft
   in
   let arg_set_action a =
     EZCMD.TYPES.Arg.Unit (fun () -> set_action a)
@@ -98,9 +92,6 @@ let main () =
 
       "--cached", Arg.Set cached,
       "read cached state";
-
-      "--frontend", Arg.String set_frontend_type,
-      "set frontend type (js, js_api, js_ocaml)";
 
       "--db-update", Arg.Set db_update_index,
       "update database of index";
